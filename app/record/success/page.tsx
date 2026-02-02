@@ -31,7 +31,7 @@ export default function SuccessPage() {
                         onClick={() => router.push('/')}
                         className={styles.secondaryButton}
                     >
-                        続けてお告げを受ける
+                        続けてミッションを受ける
                     </button>
                 </div>
             </main>

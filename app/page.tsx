@@ -10,7 +10,7 @@ export default function Home() {
 
     useEffect(() => {
         // ローカルストレージからユーザーIDを取得
-        const storedUserId = localStorage.getItem('sanposhin_userId');
+        const storedUserId = localStorage.getItem('reborn_userId');
         setUserId(storedUserId);
     }, []);
 
@@ -25,13 +25,13 @@ export default function Home() {
     return (
         <div className={styles.container}>
             <main className={styles.main}>
-                <h1 className={styles.title}>散歩神</h1>
+                <h1 className={styles.title}>散歩Reborn</h1>
                 <p className={styles.subtitle}>今日の散歩に、</p>
                 <p className={styles.subtitle}>小さな意味を。</p>
 
                 <div className={styles.buttonContainer}>
                     <button onClick={handleStart} className={styles.primaryButton}>
-                        {userId ? 'お告げを受ける' : '始める'}
+                        {userId ? 'ミッションを受ける' : '始める'}
                     </button>
                 </div>
 

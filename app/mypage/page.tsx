@@ -30,7 +30,7 @@ export default function MyPage() {
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
     useEffect(() => {
-        const storedUserId = localStorage.getItem('sanposhin_userId');
+        const storedUserId = localStorage.getItem('reborn_userId');
         if (!storedUserId) {
             router.push('/setup');
             return;
@@ -38,7 +38,7 @@ export default function MyPage() {
         setUserId(storedUserId);
 
         // 統計情報取得
-        const logsString = localStorage.getItem('sanposhin_logs') || '[]';
+        const logsString = localStorage.getItem('reborn_logs') || '[]';
         const logs = JSON.parse(logsString);
         setTotalAdventures(logs.length);
 
@@ -156,7 +156,7 @@ export default function MyPage() {
                 await restoreLogsToFirestore(userId, backupData.logs);
 
                 // localStorage にもキャッシュ
-                localStorage.setItem('sanposhin_logs', JSON.stringify(backupData.logs));
+                localStorage.setItem('reborn_logs', JSON.stringify(backupData.logs));
 
                 // 成功したので試行カウントをリセット
                 const resetAttempt: RestoreAttempt = { failureCount: 0, lockedUntil: null };

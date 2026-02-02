@@ -1,4 +1,4 @@
-// ミッション（お告げ）の型定義
+// ミッションの型定義
 export interface Mission {
     id: string;
     text: string;

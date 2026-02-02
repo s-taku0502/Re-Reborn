@@ -17,7 +17,7 @@ export default function AlbumPage() {
 
     useEffect(() => {
         // ユーザーIDチェック
-        const storedUserId = localStorage.getItem('sanposhin_userId');
+        const storedUserId = localStorage.getItem('reborn_userId');
         if (!storedUserId) {
             router.push('/setup');
             return;
@@ -96,7 +96,7 @@ export default function AlbumPage() {
 
                     // localStorage も更新
                     try {
-                        localStorage.setItem('sanposhin_logs', JSON.stringify(updatedLogs));
+                        localStorage.setItem('reborn_logs', JSON.stringify(updatedLogs));
                     } catch (storageError) {
                         console.warn('localStorage の更新に失敗しました:', storageError);
                     }
@@ -133,7 +133,7 @@ export default function AlbumPage() {
                             onClick={() => router.push('/')}
                             className={styles.primaryButton}
                         >
-                            お告げを受ける
+                            ミッションを受ける
                         </button>
                     </div>
                 </main>

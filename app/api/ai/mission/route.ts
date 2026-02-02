@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getRandomFallbackMission } from '@/data/fallbackMissions';
 
 export const runtime = 'nodejs';
@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
 // Gemini API Key - 環境変数 GEMINI_API_KEY または AI_PROVIDER_API_KEY から取得
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.AI_PROVIDER_API_KEY;
 
-const SYSTEM_PROMPT = `あなたは「散歩神」という散歩アプリの神様です。
-ユーザーに散歩のお題（ミッション）を与える役割を持っています。
+const SYSTEM_PROMPT = `あなたは「散歩Reborn」という散歩アプリのミッション生成AIです。
+ユーザーに散歩のミッションを与える役割を持っています。
 
 ## お題生成の制約:
 1. 安全性: 危険な行為、違法行為、他人に迷惑をかける行為は絶対に避ける
@@ -69,10 +69,9 @@ export async function POST(req: NextRequest) {
 
         console.log('[AI Mission] Attempting Gemini API call...');
 
-        // Gemini API クライアント初期化（環境変数から自動取得）
-        const ai = new GoogleGenAI({
-            apiKey: GEMINI_API_KEY,
-        });
+        // Gemini API クライアント初期化
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
         const userPrompt = `現在の状況:
 - 時間帯: ${timeOfDay}
@@ -80,14 +79,11 @@ export async function POST(req: NextRequest) {
 
 上記を考慮して、散歩のお題を1つ生成してください。JSON形式で返してください。`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
-            contents: `${SYSTEM_PROMPT}\n\n${userPrompt}`,
-        });
+        const response = await model.generateContent(`${SYSTEM_PROMPT}\n\n${userPrompt}`);
 
         console.log('[AI Mission] Gemini API response received');
 
-        const content = response.text;
+        const content = response.response.text();
 
         if (!content) {
             console.warn('[AI Mission] Empty response from Gemini');

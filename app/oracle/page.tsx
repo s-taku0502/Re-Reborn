@@ -16,14 +16,14 @@ export default function OraclePage() {
 
     useEffect(() => {
         // ユーザーIDチェック
-        const storedUserId = localStorage.getItem('sanposhin_userId');
+        const storedUserId = localStorage.getItem('reborn_userId');
         if (!storedUserId) {
             router.push('/setup');
             return;
         }
         setUserId(storedUserId);
 
-        // ランダムにお告げを選択
+        // ランダムにミッションを選択
         generateNewMission();
     }, [router]);
 
@@ -84,7 +84,7 @@ export default function OraclePage() {
 
     const handleRecord = () => {
         if (currentMission) {
-            // お告げ情報を渡して記録ページへ
+            // ミッション情報を渡して記録ページへ
             const missionData = encodeURIComponent(JSON.stringify(currentMission));
             router.push(`/record?mission=${missionData}&startTime=${startTime?.toISOString()}`);
         }
@@ -102,7 +102,7 @@ export default function OraclePage() {
         return (
             <div className={styles.container}>
                 <main className={styles.main}>
-                    <h1 className={styles.header}>今日のお告げ</h1>
+                    <h1 className={styles.header}>今日のミッション</h1>
 
                     <div className={styles.oracleBox}>
                         <p className={styles.oracleText}>{currentMission.text}</p>
@@ -116,7 +116,7 @@ export default function OraclePage() {
                         onClick={generateNewMission}
                         className={styles.secondaryButton}
                     >
-                        別のお告げを受ける
+                        別のミッションを受ける
                     </button>
                 </main>
             </div>

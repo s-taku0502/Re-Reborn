@@ -57,7 +57,7 @@ export function getPasswordHashFromStorage(): string | null {
  */
 export async function resetPassword(): Promise<string | null> {
     // ログイン状態を確認
-    const userId = localStorage.getItem('sanposhin_userId');
+    const userId = localStorage.getItem('reborn_userId');
     if (!userId) {
         return null;
     }

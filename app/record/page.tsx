@@ -23,7 +23,7 @@ function RecordContent() {
 
     useEffect(() => {
         // ユーザーIDチェック
-        const storedUserId = localStorage.getItem('sanposhin_userId');
+        const storedUserId = localStorage.getItem('reborn_userId');
         if (!storedUserId) {
             router.push('/setup');
             return;

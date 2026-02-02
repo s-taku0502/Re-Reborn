@@ -1,4 +1,4 @@
-# Robots.txt for 散歩神 Reborn
+# Robots.txt for Reborn
 # 本ファイルは検索エンジンのクロール方針を定義します
 
 User-agent: *

@@ -133,14 +133,14 @@ export default function SetupPage() {
 
             // 3. localStorage に保存
             await savePasswordHash(password);
-            localStorage.setItem('sanposhin_userId', userId);
+            localStorage.setItem('reborn_userId', userId);
 
             // ログイン試行回数をリセット
             resetLoginAttempt();
 
             // 4. サーバーからログを受け取り localStorage にキャッシュ
             const logs = Array.isArray(data.logs) ? data.logs : [];
-            localStorage.setItem('sanposhin_logs', JSON.stringify(logs));
+            localStorage.setItem('reborn_logs', JSON.stringify(logs));
             console.log(`ログイン成功: ${logs.length}件のログを取得しました`);
 
             // 5. ホームへリダイレクト
@@ -202,9 +202,9 @@ export default function SetupPage() {
 
             // 4. localStorage にも保存（キャッシュ）
             await savePasswordHash(password);
-            localStorage.setItem('sanposhin_userId', userId);
-            localStorage.setItem('sanposhin_createdAt', new Date().toISOString());
-            localStorage.setItem('sanposhin_logs', JSON.stringify([]));
+            localStorage.setItem('reborn_userId', userId);
+            localStorage.setItem('reborn_createdAt', new Date().toISOString());
+            localStorage.setItem('reborn_logs', JSON.stringify([]));
 
             // 5. ホームへリダイレクト
             router.push('/');
@@ -223,7 +223,7 @@ export default function SetupPage() {
                 <p className={styles.description}>
                     {mode === 'signup' ? (
                         <>
-                            散歩神を始めるために、<br />
+                            散歩Rebornを始めるために、<br />
                             ユーザーIDとバックアップ用パスワードを設定してください。
                         </>
                     ) : (

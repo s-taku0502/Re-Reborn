@@ -2,7 +2,7 @@
 
 ## 📋 概要
 
-散歩神 Reborn では、画像管理に **Cloudinary** を使用します。  
+Reborn では、画像管理に **Cloudinary** を使用します。  
 Cloudinary は画像CDNとして、自動最適化・リサイズ・変換機能を提供します。
 
 **SDK情報**:

@@ -1,7 +1,7 @@
 {
-    "name": "散歩神（Sanposhin Reborn）",
-    "short_name": "散歩神",
-    "description": "日常の散歩を、神のお告げ（ミッション）によって非日常の冒険に変えるロケーションベースドPWA",
+    "name": "Reborn",
+    "short_name": "Reborn",
+    "description": "日常の散歩を、ミッションによって非日常の冒険に変えるロケーションベースドPWA",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",

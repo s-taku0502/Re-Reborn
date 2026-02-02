@@ -1,5 +1,5 @@
 {
-  "name": "sanposhin-reborn",
+  "name": "reborn",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@google/genai": "^1.0.0",
+    "@google/generative-ai": "^0.21.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
     "firebase": "^11.0.1",

@@ -1,4 +1,4 @@
-// Service Worker for 散歩神（Sanposhin Reborn）
+// Service Worker for Reborn
 // Version: 1.0.0
 
 const CACHE_NAME = 'sanposhin-v1';
@@ -148,5 +148,5 @@ self.addEventListener('push', (event) => {
         icon: '/icon-192x192.png',
         badge: '/icon-192x192.png',
     };
-    event.waitUntil(self.registration.showNotification(data.title || '散歩神', options));
+    event.waitUntil(self.registration.showNotification(data.title || 'Reborn', options));
 });
