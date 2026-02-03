@@ -35,7 +35,7 @@ export function isCloudinaryConfigured(): boolean {
  * Cloudinary画像URLの許可判定
  * - res.cloudinary.com のみ許可
  * - cloudName が一致する場合のみ許可
- * - userId が指定されている場合は sanposhin/{userId} 配下のみ許可
+ * - userId が指定されている場合は michikusa_memory/{userId} 配下のみ許可
  */
 export function isAllowedImageUrl(url: string, userId?: string): boolean {
     try {
@@ -46,7 +46,7 @@ export function isAllowedImageUrl(url: string, userId?: string): boolean {
         if (!cloudName || !parsed.pathname.startsWith(`/${cloudName}/`)) return false;
 
         if (userId) {
-            return parsed.pathname.includes(`/sanposhin/${userId}/`);
+            return parsed.pathname.includes(`/michikusa_memory/${userId}/`);
         }
 
         return true;
@@ -79,10 +79,10 @@ export async function uploadToCloudinary(
     }
 
     formData.append('upload_preset', cloudinaryConfig.uploadPreset);
-    formData.append('folder', `sanposhin/${userId}`);
+    formData.append('folder', `michikusa_memory/${userId}`);
     formData.append('timestamp', Date.now().toString());
 
-    console.log('Cloudinary upload folder:', `sanposhin/${userId}`);
+    console.log('Cloudinary upload folder:', `michikusa_memory/${userId}`);
 
     const response = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`,
@@ -199,8 +199,8 @@ export async function deleteFromCloudinary(publicId: string): Promise<void> {
 export function extractPublicId(url: string): string | null {
     if (!url.includes('cloudinary.com')) return null;
 
-    const match = url.match(/\/sanposhin\/[^/]+\/([^/.]+)/);
-    return match ? `sanposhin/${match[1]}` : null;
+    const match = url.match(/\/michikusa_memory\/[^/]+\/([^/.]+)/);
+    return match ? `michikusa_memory/${match[1]}` : null;
 }
 
 /**

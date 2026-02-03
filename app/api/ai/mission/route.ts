@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { getRandomFallbackMission } from '@/data/fallbackMissions';
 
 // 開発環境での SSL 証明書検証緩和（テスト用）
@@ -12,7 +12,8 @@ export const dynamic = 'force-dynamic';
 
 // 環境変数の取得（優先順位: AI_PROVIDER_API_KEY > GEMINI_API_KEY）
 const GEMINI_API_KEY = process.env.AI_PROVIDER_API_KEY || process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash-exp';
+// モデル名を環境変数から取得。未設定の場合は 'gemini-1.5-flash-latest' を使用
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash-latest';
 
 const SYSTEM_PROMPT = `あなたは「散歩Reborn」という散歩アプリのミッション生成AIです。
 ユーザーに散歩のミッションを与える役割を持っています。
@@ -65,7 +66,9 @@ export async function POST(req: NextRequest) {
 
         // デバッグ情報
         console.log('[AI Mission] API Key exists:', !!GEMINI_API_KEY);
-        console.log('[AI Mission] API Key prefix:', GEMINI_API_KEY?.substring(0, 10) + '...');
+        if (GEMINI_API_KEY) {
+            console.log('[AI Mission] API Key prefix:', GEMINI_API_KEY.substring(0, 10) + '...');
+        }
 
         // AI未設定の場合はフォールバック
         if (!GEMINI_API_KEY) {
@@ -76,9 +79,29 @@ export async function POST(req: NextRequest) {
         console.log('[AI Mission] Attempting Gemini API call...');
         console.log('[AI Mission] Using model:', GEMINI_MODEL);
 
-        // Google GenAI クライアント初期化（新SDK）
-        const ai = new GoogleGenAI({
-            apiKey: GEMINI_API_KEY,
+        // Google Generative AI クライアント初期化
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+
+        const model = genAI.getGenerativeModel({
+            model: GEMINI_MODEL,
+            safetySettings: [ // 安全性設定を追加
+                {
+                    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                },
+            ],
         });
 
         const userPrompt = `現在の状況:
@@ -89,57 +112,13 @@ export async function POST(req: NextRequest) {
 
         const fullPrompt = `${SYSTEM_PROMPT}\n\n${userPrompt}`;
 
-        // モデル名に models/ プレフィックスを付ける
-        const modelName = GEMINI_MODEL.startsWith('models/') ? GEMINI_MODEL : `models/${GEMINI_MODEL}`;
-
-        // リトライロジック付きAPI呼び出し
-        let response: any;
-        let lastError;
-        const maxRetries = 3;
-        const timeout = 15000; // 15秒
-
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-                response = await Promise.race([
-                    ai.models.generateContent({
-                        model: modelName,
-                        contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
-                    }),
-                    new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('API timeout')), timeout)
-                    )
-                ]);
-
-                clearTimeout(timeoutId);
-                console.log('[AI Mission] Gemini API response received');
-                break;
-            } catch (error: any) {
-                lastError = error;
-                console.warn(`[AI Mission] API call attempt ${attempt}/${maxRetries} failed:`, error.message);
-
-                if (attempt < maxRetries) {
-                    // 指数バックオフ: 1秒 → 2秒 → 4秒
-                    const delay = Math.pow(2, attempt - 1) * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                } else {
-                    console.error('[AI Mission] All retry attempts failed, using fallback');
-                    return NextResponse.json(getRandomFallback());
-                }
-            }
-        }
-
-        if (!response) {
-            console.error('[AI Mission] No response from Gemini API, using fallback');
-            return NextResponse.json(getRandomFallback());
-        }
-
+        // API呼び出し
+        const result = await model.generateContent(fullPrompt);
+        const response = result.response;
         const content = response.text();
 
         if (!content) {
-            console.warn('[AI Mission] Empty response from Gemini');
+            console.warn('[AI Mission] Empty response from Gemini, using fallback');
             return NextResponse.json(getRandomFallback());
         }
 
@@ -147,16 +126,31 @@ export async function POST(req: NextRequest) {
 
         // JSON 抽出（Gemini がマークダウンでラップすることがあるため）
         let jsonStr = content;
-        const jsonMatch = content.match(/\{[^{}]*\}/);
-        if (jsonMatch) {
-            jsonStr = jsonMatch[0];
+        const jsonMatch = content.match(/```(json)?\s*(\{[\s\S]*?\})\s*```/);
+        if (jsonMatch && jsonMatch[2]) {
+            jsonStr = jsonMatch[2];
+        } else {
+            // フォールバックとして、最初の `{` と最後の `}` で囲まれた部分を抽出
+            const firstBrace = jsonStr.indexOf('{');
+            const lastBrace = jsonStr.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+            }
         }
 
-        const missionData = JSON.parse(jsonStr);
+        let missionData;
+        try {
+            missionData = JSON.parse(jsonStr);
+        } catch (parseError) {
+            console.error('[AI Mission] Failed to parse JSON from response, using fallback.', parseError);
+            console.error('[AI Mission] Original content:', content);
+            return NextResponse.json(getRandomFallback());
+        }
+
 
         // バリデーション
         if (!missionData.text || !missionData.category || !missionData.difficulty) {
-            console.warn('[AI Mission] Invalid mission data:', missionData);
+            console.warn('[AI Mission] Invalid mission data received from AI:', missionData);
             return NextResponse.json(getRandomFallback());
         }
 
@@ -172,7 +166,7 @@ export async function POST(req: NextRequest) {
             category: missionData.category,
             difficulty: Number(missionData.difficulty) || 2,
             source: 'ai',
-            reason: missionData.reason || 'AI生成',
+            reason: missionData.reason || 'AIが現在の状況に合わせて生成しました',
         };
 
         console.log('[AI Mission] ✨ AI Generated mission:', aiMission.text);
@@ -180,6 +174,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(aiMission);
     } catch (error) {
         console.error('[AI Mission] ❌ Generate mission API error:', error);
+        // エラーがAPIからのものか、それ以外かを判断
+        if (error instanceof Error) {
+            console.error('[AI Mission] Error message:', error.message);
+        }
         const fallback = getRandomFallback();
         return NextResponse.json(fallback);
     }

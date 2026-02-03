@@ -38,9 +38,9 @@ export function generateRandomPassword(): string {
  */
 export async function savePasswordHash(password: string): Promise<void> {
     const hash = await hashPassword(password);
-    localStorage.setItem('sanposhin_password_hash', hash);
+    localStorage.setItem('michikusa_memory_password_hash', hash);
     // 平文パスワードは保存しない
-    localStorage.removeItem('sanposhin_password');
+    localStorage.removeItem('michikusa_memory_password');
 }
 
 /**
@@ -48,7 +48,7 @@ export async function savePasswordHash(password: string): Promise<void> {
  * @returns ハッシュ、またはnull
  */
 export function getPasswordHashFromStorage(): string | null {
-    return localStorage.getItem('sanposhin_password_hash');
+    return localStorage.getItem('michikusa_memory_password_hash');
 }
 
 /**

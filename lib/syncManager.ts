@@ -11,7 +11,7 @@ interface SyncQueueItem {
     timestamp: number;
 }
 
-const SYNC_QUEUE_KEY = 'sanposhin_sync_queue';
+const SYNC_QUEUE_KEY = 'michikusa_memory_sync_queue';
 
 /**
  * 同期キューにログを追加

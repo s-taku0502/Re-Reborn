@@ -13,7 +13,7 @@ cloudinary.config({
 
 function extractPublicIdFromUrl(url: string): string | null {
     try {
-        const match = url.match(/\/sanposhin\/[^/]+\/([^/.]+)/);
+        const match = url.match(/\/michikusa_memory\/[^/]+\/([^/.]+)/);
         if (!match) return null;
         const segments = url.split('/upload/')[1];
         if (!segments) return null;
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
         // フォルダ削除を試みる
         try {
-            await cloudinary.api.delete_folder(`sanposhin/${userId}`);
+            await cloudinary.api.delete_folder(`michikusa_memory/${userId}`);
         } catch (error) {
             console.warn(`Failed to delete folder for ${userId}:`, error);
         }

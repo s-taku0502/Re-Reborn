@@ -78,7 +78,7 @@ pnpm dev
 ## 🗂 ディレクトリ構造
 
 ```
-sanposhin-reborn/
+michikusa_memory/
 ├── app/                    # Next.js App Router
 │   ├── api/               # サーバー側API Routes
 │   │   ├── auth/         # 認証 (signup, login)

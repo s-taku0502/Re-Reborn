@@ -27,7 +27,7 @@ export async function uploadImageServer(imageData: string, userId: string) {
     const cloudinary = configureCloudinary();
 
     const uploadResult = await cloudinary.uploader.upload(imageData, {
-        folder: `sanposhin/${userId}`,
+        folder: `michikusa_memory/${userId}`,
         resource_type: 'image',
         transformation: [
             {
@@ -83,7 +83,7 @@ export async function deleteUserImagesServer(userId: string) {
 
     // フォルダ内の全リソースを削除
     const result = await cloudinary.api.delete_resources_by_prefix(
-        `sanposhin/${userId}`,
+        `michikusa_memory/${userId}`,
         {
             resource_type: 'image',
         }

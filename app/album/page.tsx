@@ -39,7 +39,7 @@ export default function AlbumPage() {
 
                 // localStorage にもキャッシュ（オフライン対応）
                 try {
-                    localStorage.setItem('sanposhin_logs', JSON.stringify(sortedLogs));
+                    localStorage.setItem('michikusa_memory_logs', JSON.stringify(sortedLogs));
                 } catch (storageError) {
                     console.warn('localStorage へのキャッシュに失敗しました:', storageError);
                 }
@@ -50,7 +50,7 @@ export default function AlbumPage() {
 
                 // オフライン時は localStorage からフォールバック
                 try {
-                    const logsString = localStorage.getItem('sanposhin_logs') || '[]';
+                    const logsString = localStorage.getItem('michikusa_memory_logs') || '[]';
                     const cachedLogs: UserLog[] = JSON.parse(logsString);
                     const sortedLogs = cachedLogs.sort((a, b) => {
                         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();

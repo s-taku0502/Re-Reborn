@@ -15,7 +15,7 @@ export default function SetupPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const LOGIN_ATTEMPT_KEY = 'sanposhin_login_attempt';
+    const LOGIN_ATTEMPT_KEY = 'michikusa_memory_login_attempt';
     const MAX_LOGIN_ATTEMPTS = 5;
     const LOCK_MINUTES = 15;
 

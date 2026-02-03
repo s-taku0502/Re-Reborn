@@ -1,8 +1,8 @@
 // Service Worker for Reborn
 // Version: 1.0.0
 
-const CACHE_NAME = 'sanposhin-v1';
-const RUNTIME_CACHE = 'sanposhin-runtime-v1';
+const CACHE_NAME = 'michikusa_memory-v1';
+const RUNTIME_CACHE = 'michikusa_memory-runtime-v1';
 
 // インストール時にキャッシュするリソース
 const PRECACHE_URLS = [

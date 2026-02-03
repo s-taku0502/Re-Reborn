@@ -153,14 +153,14 @@ export function showConfirmModal(message: string, onConfirm: () => void): void {
  */
 function showConfirmModalInternal(message: string, onConfirm: () => void): void {
     // 既存のモーダルを削除
-    const existingModal = document.getElementById('sanposhin-modal');
+    const existingModal = document.getElementById('michikusa_memory-modal');
     if (existingModal) {
         existingModal.remove();
     }
 
     // モーダル作成
     const overlay = document.createElement('div');
-    overlay.id = 'sanposhin-modal';
+    overlay.id = 'michikusa_memory-modal';
     overlay.style.cssText = `
         position: fixed;
         top: 0;
@@ -287,14 +287,14 @@ function showConfirmModalInternal(message: string, onConfirm: () => void): void 
  */
 function showModal(message: string, type: 'error' | 'success' | 'info' = 'info'): void {
     // 既存のモーダルを削除
-    const existingModal = document.getElementById('sanposhin-modal');
+    const existingModal = document.getElementById('michikusa_memory-modal');
     if (existingModal) {
         existingModal.remove();
     }
 
     // モーダル作成
     const overlay = document.createElement('div');
-    overlay.id = 'sanposhin-modal';
+    overlay.id = 'michikusa_memory-modal';
     overlay.style.cssText = `
         position: fixed;
         top: 0;

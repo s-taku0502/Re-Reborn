@@ -149,10 +149,10 @@ function RecordContent() {
                     isPublic: false,
                     createdAt: new Date().toISOString(),
                 };
-                const logsString = localStorage.getItem('sanposhin_logs') || '[]';
+                const logsString = localStorage.getItem('michikusa_memory_logs') || '[]';
                 const logs = JSON.parse(logsString);
                 logs.push(log);
-                localStorage.setItem('sanposhin_logs', JSON.stringify(logs));
+                localStorage.setItem('michikusa_memory_logs', JSON.stringify(logs));
             } catch (storageError) {
                 console.warn('localStorage へのキャッシュに失敗しました:', storageError);
             }
@@ -305,10 +305,10 @@ function RecordContent() {
                                     isPublic: false,
                                     createdAt: new Date().toISOString(),
                                 };
-                                const logsString = localStorage.getItem('sanposhin_logs') || '[]';
+                                const logsString = localStorage.getItem('michikusa_memory_logs') || '[]';
                                 const logs = JSON.parse(logsString);
                                 logs.push(log);
-                                localStorage.setItem('sanposhin_logs', JSON.stringify(logs));
+                                localStorage.setItem('michikusa_memory_logs', JSON.stringify(logs));
                             } catch (storageError) {
                                 console.warn('localStorage へのキャッシュに失敗しました:', storageError);
                             }

@@ -43,7 +43,7 @@ export default function MyPage() {
         setTotalAdventures(logs.length);
 
         // 復元試行状態を読み込み
-        const attemptData = localStorage.getItem('sanposhin_restore_attempt');
+        const attemptData = localStorage.getItem('michikusa_memory_restore_attempt');
         if (attemptData) {
             try {
                 const attempt: RestoreAttempt = JSON.parse(attemptData);
@@ -69,7 +69,7 @@ export default function MyPage() {
             const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `sanposhin_backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.download = `michikusa_memory_backup_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
             URL.revokeObjectURL(url);
 
@@ -94,12 +94,12 @@ export default function MyPage() {
                 // ロック期限が過ぎていればリセット
                 const newAttempt: RestoreAttempt = { failureCount: 0, lockedUntil: null };
                 setRestoreAttempt(newAttempt);
-                localStorage.setItem('sanposhin_restore_attempt', JSON.stringify(newAttempt));
+                localStorage.setItem('michikusa_memory_restore_attempt', JSON.stringify(newAttempt));
             }
         }
 
         // パスワードを検証
-        const storedPasswordHash = localStorage.getItem('sanposhin_password_hash');
+        const storedPasswordHash = localStorage.getItem('michikusa_memory_password_hash');
         if (!storedPasswordHash) {
             setError('パスワードが設定されていません');
             return;
@@ -117,14 +117,14 @@ export default function MyPage() {
                 newLockedUntil = Date.now() + 60 * 60 * 1000; // 60分後
                 const newAttempt: RestoreAttempt = { failureCount: newFailureCount, lockedUntil: newLockedUntil };
                 setRestoreAttempt(newAttempt);
-                localStorage.setItem('sanposhin_restore_attempt', JSON.stringify(newAttempt));
+                localStorage.setItem('michikusa_memory_restore_attempt', JSON.stringify(newAttempt));
                 setError('復元に3回失敗しました。60分間ロックされます。');
                 return;
             }
 
             const newAttempt: RestoreAttempt = { failureCount: newFailureCount, lockedUntil: null };
             setRestoreAttempt(newAttempt);
-            localStorage.setItem('sanposhin_restore_attempt', JSON.stringify(newAttempt));
+            localStorage.setItem('michikusa_memory_restore_attempt', JSON.stringify(newAttempt));
             setError(`ユーザーIDまたはパスワードが正しくありません（残り ${3 - newFailureCount} 回）`);
             return;
         }
@@ -161,7 +161,7 @@ export default function MyPage() {
                 // 成功したので試行カウントをリセット
                 const resetAttempt: RestoreAttempt = { failureCount: 0, lockedUntil: null };
                 setRestoreAttempt(resetAttempt);
-                localStorage.setItem('sanposhin_restore_attempt', JSON.stringify(resetAttempt));
+                localStorage.setItem('michikusa_memory_restore_attempt', JSON.stringify(resetAttempt));
 
                 setTotalAdventures(backupData.logs.length);
                 setRestoreUserId('');
@@ -180,7 +180,7 @@ export default function MyPage() {
         setPasswordResetError('');
 
         // 現在のパスワードを検証
-        const storedPasswordHash = localStorage.getItem('sanposhin_password_hash');
+        const storedPasswordHash = localStorage.getItem('michikusa_memory_password_hash');
         if (!storedPasswordHash) {
             setPasswordResetError('パスワードが設定されていません');
             return;
