@@ -5,10 +5,10 @@ import ServiceWorkerRegistration from './ServiceWorkerRegistration';
 export const metadata: Metadata = {
     // SEO強化: タイトル・説明文最適化
     title: {
-        default: '散歩が冒険になる - michikusa_memory | ミッション型散歩アプリ',
-        template: '%s | michikusa_memory',
+        default: 'みちくさメモリー - 散歩が冒険になる | michikusa_memory',
+        template: '%s | みちくさメモリー',
     },
-    description: '散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
+    description: 'みちくさメモリーは散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
     
     // OG画像解決用のbaseURL設定
     metadataBase: new URL('https://michikusa-memory.vercel.app'),
@@ -21,7 +21,14 @@ export const metadata: Metadata = {
     
     // キーワード最適化（長尾キーワード含む）
     keywords: [
+        'みちくさメモリー',
+        'みちくさ',
+        'メモリー',
+        'michikusa_memory',
+        'michikusa',
+        'memory',
         '散歩',
+        'さんぽ',
         'ウォーキング',
         '散歩アプリ',
         'ミッション型散歩',
@@ -57,15 +64,15 @@ export const metadata: Metadata = {
         type: 'website',
         locale: 'ja_JP',
         url: 'https://michikusa-memory.vercel.app/',
-        siteName: 'michikusa_memory',
-        title: '散歩が冒険になる - michikusa_memory',
-        description: 'いつもの散歩が、AIミッションで非日常の冒険に。運動不足・ストレス解消・新しい発見。毎日がちょっと楽しくなる無料アプリ。',
+        siteName: 'みちくさメモリー (michikusa_memory)',
+        title: 'みちくさメモリー - 散歩が冒険になる',
+        description: 'みちくさメモリーは、いつもの散歩をAIミッションで非日常の冒険に。運動不足・ストレス解消・新しい発見。毎日がちょっと楽しくなる無料アプリ。',
         images: [
             {
                 url: '/icon-512.png',
                 width: 512,
                 height: 512,
-                alt: 'michikusa_memory - 散歩がゲームのように楽しくなるアプリ',
+                alt: 'みちくさメモリー (michikusa_memory) - 散歩がゲームのように楽しくなるアプリ',
             },
         ],
     },
@@ -73,8 +80,8 @@ export const metadata: Metadata = {
     // Twitter Card最適化
     twitter: {
         card: 'summary_large_image',
-        title: '散歩が冒険になる | michikusa_memory',
-        description: 'AIミッションで、いつもの散歩を冒険に。運動不足解消・メンタルケア・新しい発見。散歩が楽しくなる無料アプリ。',
+        title: 'みちくさメモリー - 散歩が冒険になる',
+        description: 'みちくさメモリーでAIミッションを受けて、いつもの散歩を冒険に。運動不足解消・メンタルケア・新しい発見。散歩が楽しくなる無料アプリ。',
         images: ['/icon-512.png'],
         creator: '@michikusa_memory',
         site: '@michikusa_memory',
@@ -100,7 +107,7 @@ export const metadata: Metadata = {
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
-        title: 'michikusa_memory',
+        title: 'みちくさメモリー',
     },
     
     // カノニカルURL
@@ -146,7 +153,7 @@ export default function RootLayout({
                         __html: JSON.stringify({
                             '@context': 'https://schema.org',
                             '@type': 'MobileApplication',
-                            name: 'michikusa_memory',
+                            name: 'みちくさメモリー (michikusa_memory)',
                             alternativeName: '散歩が冒険になる',
                             url: 'https://michikusa-memory.vercel.app/',
                             applicationCategory: 'HealthApplication',
@@ -159,10 +166,10 @@ export default function RootLayout({
                                 availability: 'https://schema.org/InStock',
                             },
                             description:
-                                '散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
+                                'みちくさメモリーは散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
                             author: {
                                 '@type': 'Organization',
-                                name: 'michikusa_memory',
+                                name: 'みちくさメモリー',
                                 url: 'https://michikusa-memory.vercel.app/',
                             },
                             aggregateRating: {
@@ -188,10 +195,10 @@ export default function RootLayout({
                             mainEntity: [
                                 {
                                     '@type': 'Question',
-                                    name: 'michikusa_memoryとは何ですか?',
+                                    name: 'みちくさメモリー（michikusa_memory）とは何ですか?',
                                     acceptedAnswer: {
                                         '@type': 'Answer',
-                                        text: 'AIが生成するミッションで、いつもの散歩を冒険に変える無料アプリです。運動不足解消やメンタルヘルスケアに最適。',
+                                        text: 'みちくさメモリーは、AIが生成するミッションで、いつもの散歩を冒険に変える無料アプリです。運動不足解消やメンタルヘルスケアに最適。',
                                     },
                                 },
                                 {
