@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { getRandomFallbackMission } from '@/data/fallbackMissions';
+
+// 開発環境での SSL 証明書検証緩和（テスト用）
+if (process.env.NODE_ENV === 'development') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Gemini API Key - 環境変数 GEMINI_API_KEY または AI_PROVIDER_API_KEY から取得
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.AI_PROVIDER_API_KEY;
+// 環境変数の取得（優先順位: AI_PROVIDER_API_KEY > GEMINI_API_KEY）
+const GEMINI_API_KEY = process.env.AI_PROVIDER_API_KEY || process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash-exp';
 
 const SYSTEM_PROMPT = `あなたは「散歩Reborn」という散歩アプリのミッション生成AIです。
 ユーザーに散歩のミッションを与える役割を持っています。
@@ -68,10 +74,12 @@ export async function POST(req: NextRequest) {
         }
 
         console.log('[AI Mission] Attempting Gemini API call...');
+        console.log('[AI Mission] Using model:', GEMINI_MODEL);
 
-        // Gemini API クライアント初期化
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        // Google GenAI クライアント初期化（新SDK）
+        const ai = new GoogleGenAI({
+            apiKey: GEMINI_API_KEY,
+        });
 
         const userPrompt = `現在の状況:
 - 時間帯: ${timeOfDay}
@@ -79,11 +87,56 @@ export async function POST(req: NextRequest) {
 
 上記を考慮して、散歩のお題を1つ生成してください。JSON形式で返してください。`;
 
-        const response = await model.generateContent(`${SYSTEM_PROMPT}\n\n${userPrompt}`);
+        const fullPrompt = `${SYSTEM_PROMPT}\n\n${userPrompt}`;
 
-        console.log('[AI Mission] Gemini API response received');
+        // モデル名に models/ プレフィックスを付ける
+        const modelName = GEMINI_MODEL.startsWith('models/') ? GEMINI_MODEL : `models/${GEMINI_MODEL}`;
 
-        const content = response.response.text();
+        // リトライロジック付きAPI呼び出し
+        let response: any;
+        let lastError;
+        const maxRetries = 3;
+        const timeout = 15000; // 15秒
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                response = await Promise.race([
+                    ai.models.generateContent({
+                        model: modelName,
+                        contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+                    }),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('API timeout')), timeout)
+                    )
+                ]);
+
+                clearTimeout(timeoutId);
+                console.log('[AI Mission] Gemini API response received');
+                break;
+            } catch (error: any) {
+                lastError = error;
+                console.warn(`[AI Mission] API call attempt ${attempt}/${maxRetries} failed:`, error.message);
+
+                if (attempt < maxRetries) {
+                    // 指数バックオフ: 1秒 → 2秒 → 4秒
+                    const delay = Math.pow(2, attempt - 1) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    console.error('[AI Mission] All retry attempts failed, using fallback');
+                    return NextResponse.json(getRandomFallback());
+                }
+            }
+        }
+
+        if (!response) {
+            console.error('[AI Mission] No response from Gemini API, using fallback');
+            return NextResponse.json(getRandomFallback());
+        }
+
+        const content = response.text();
 
         if (!content) {
             console.warn('[AI Mission] Empty response from Gemini');
