@@ -1,6 +1,7 @@
-# Robots.txt for Reborn
+# Robots.txt for michikusa_memory
 # 本ファイルは検索エンジンのクロール方針を定義します
 
+# すべてのロボットに対する指示
 User-agent: *
 Allow: /
 
@@ -10,5 +11,22 @@ Disallow: /api/
 # Next.js ビルド生成物（実装詳細）
 Disallow: /_next/
 
+# Google
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# 認証が必要なページ（検索エンジンがクロール不要）
+Disallow: /setup
+Disallow: /oracle
+Disallow: /record
+Disallow: /album
+Disallow: /mypage
+
 # サイトマップ
-Sitemap: /sitemap.xml
+Sitemap: https://sanpo-reborn.vercel.app/sitemap.xml

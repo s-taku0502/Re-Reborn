@@ -1,8 +1,19 @@
 'use client';
 
+import type { Metadata } from 'next';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
+
+export const metadata: Metadata = {
+    title: 'ホーム - michikusa_memory',
+    description: 'AI生成ミッションで散歩を冒険に。まだ始めていない方は今すぐスタート。すでに登録済みの方はミッションを受けましょう。',
+    openGraph: {
+        title: 'ホーム | michikusa_memory - 散歩が冒険になる',
+        description: 'AI生成ミッションで散歩を冒険に。まだ始めていない方は今すぐスタート。',
+        type: 'website',
+    },
+};
 
 export default function Home() {
     const router = useRouter();

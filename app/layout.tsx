@@ -8,14 +8,22 @@ export const metadata: Metadata = {
         default: '散歩が冒険になる - michikusa_memory | ミッション型散歩アプリ',
         template: '%s | michikusa_memory',
     },
-    description: '散歩・ウォーキングがゲームのように楽しくなる無料アプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルケア、新しい発見。いつもの道が冒険に変わる。',
+    description: '散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
+    formatDetection: {
+        email: false,
+        telephone: false,
+        address: false,
+    },
     
-    // キーワード最適化
+    // キーワード最適化（長尾キーワード含む）
     keywords: [
         '散歩',
         'ウォーキング',
+        '散歩アプリ',
+        'ミッション型散歩',
+        'AIミッション',
         '運動',
-        '運動不足',
+        '運動不足解消',
         '健康',
         'メンタルヘルス',
         'ストレス解消',
@@ -24,16 +32,20 @@ export const metadata: Metadata = {
         'カメラ',
         'ミッション',
         'ゲーム',
+        'ゲーミフィケーション',
         '冒険',
         '発見',
-        'AI',
+        'AI生成',
         '無料アプリ',
         'PWA',
-        'オフライン',
-        'GPS',
-        'ロケーション',
+        'オフライン対応',
+        'GPS機能',
+        'ロケーションベース',
         '日記',
         '記録',
+        '健康管理',
+        'フィットネス',
+        '習慣化',
     ],
     
     // OGP強化
@@ -56,11 +68,12 @@ export const metadata: Metadata = {
     
     // Twitter Card最適化
     twitter: {
-        card: 'summary',
+        card: 'summary_large_image',
         title: '散歩が冒険になる | michikusa_memory',
-        description: 'AIミッションで、いつもの道が非日常に。運動不足解消・メンタルケア・新しい発見。散歩が楽しくなる無料アプリ。',
+        description: 'AIミッションで、いつもの散歩を冒険に。運動不足解消・メンタルケア・新しい発見。散歩が楽しくなる無料アプリ。',
         images: ['/icon-512.png'],
-        creator: '@your_twitter_handle', // TODO: 実際のTwitterハンドルに変更
+        creator: '@michikusa_memory',
+        site: '@michikusa_memory',
     },
     
     // 検索エンジン向けヒント
@@ -89,10 +102,19 @@ export const metadata: Metadata = {
     // カノニカルURL
     alternates: {
         canonical: 'https://sanpo-reborn.vercel.app/',
+        languages: {
+            'ja': 'https://sanpo-reborn.vercel.app/',
+            'x-default': 'https://sanpo-reborn.vercel.app/',
+        },
     },
     
     // カテゴリー
     category: 'health',
+    
+    // その他のメタデータ
+    referrer: 'strict-origin-when-cross-origin',
+    themeColor: '#4CAF50',
+    colorScheme: 'light dark',
 };
 
 export const viewport: Viewport = {
@@ -111,6 +133,10 @@ export default function RootLayout({
     return (
         <html lang="ja">
             <head>
+                {/* hreflang タグ */}
+                <link rel="alternate" hrefLang="ja" href="https://sanpo-reborn.vercel.app/" />
+                <link rel="alternate" hrefLang="x-default" href="https://sanpo-reborn.vercel.app/" />
+                
                 {/* 構造化データ (JSON-LD) - Google検索結果強化 */}
                 <script
                     type="application/ld+json"
@@ -119,22 +145,34 @@ export default function RootLayout({
                             '@context': 'https://schema.org',
                             '@type': 'MobileApplication',
                             name: 'michikusa_memory',
+                            alternativeName: '散歩が冒険になる',
+                            url: 'https://sanpo-reborn.vercel.app/',
                             applicationCategory: 'HealthApplication',
                             operatingSystem: 'Any',
+                            browserRequirements: 'Requires JavaScript enabled',
                             offers: {
                                 '@type': 'Offer',
                                 price: '0',
                                 priceCurrency: 'JPY',
+                                availability: 'https://schema.org/InStock',
                             },
                             description:
-                                '散歩・ウォーキングがゲームのように楽しくなる無料アプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルケア、新しい発見。',
+                                '散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
+                            author: {
+                                '@type': 'Organization',
+                                name: 'michikusa_memory',
+                                url: 'https://sanpo-reborn.vercel.app/',
+                            },
                             aggregateRating: {
                                 '@type': 'AggregateRating',
                                 ratingValue: '4.9',
                                 ratingCount: '523',
                                 reviewCount: '412',
+                                bestRating: '5',
+                                worstRating: '1',
                             },
-                            screenshot: '/icon-512.png',
+                            screenshot: ['/icon-512.png', '/icon-192.png'],
+                            inLanguage: 'ja',
                         }),
                     }}
                 />
