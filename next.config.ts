@@ -9,7 +9,7 @@ const csp = [
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://res.cloudinary.com",
-    "connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://*.cloudinary.com https://nominatim.openstreetmap.org https://worldtimeapi.org",
+    "connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://*.cloudinary.com https://nominatim.openstreetmap.org",
     "font-src 'self'",
 ].join('; ');
 

@@ -1,6 +1,6 @@
 /**
  * 位置情報とタイムゾーン情報を取得するユーティリティ
- * Nominatim (Open Street Map) + WorldTimeAPI を使用
+ * Nominatim (Open Street Map) + ブラウザ標準 API を使用
  */
 
 export interface GeoLocation {
@@ -43,67 +43,14 @@ export function getUserLocation(): Promise<{ latitude: number; longitude: number
 }
 
 /**
- * WorldTimeAPI でタイムゾーン情報を取得
+ * ブラウザのタイムゾーンと現地時刻を取得（ローカル実装）
  */
-async function getTimezoneFromCoordinates(
-    latitude: number,
-    longitude: number
-): Promise<{ timezone: string; localDateTime: Date } | null> {
-    try {
-        const response = await fetch(
-            `https://worldtimeapi.org/api/timezone`,
-            {
-                headers: {
-                    'User-Agent': 'michikusa_memory_app',
-                },
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`WorldTimeAPI error: ${response.status}`);
-        }
-
-        const timezones = await response.json();
-
-        // 簡易的なタイムゾーン推定（緯度経度から）
-        // より正確には GeoNames API を使用すべきだが、ここでは UTC+9（日本）をデフォルトに
-        let timezone = 'Asia/Tokyo';
-
-        // 経度からおおよそのタイムゾーンを推定
-        const estimatedOffset = Math.round(longitude / 15);
-        if (estimatedOffset >= -12 && estimatedOffset <= 12) {
-            const offsetHours = estimatedOffset > 0 ? `+${estimatedOffset}` : estimatedOffset;
-            // UTCオフセットからタイムゾーン名を探す（簡易版）
-            const tzList = timezones as string[];
-            const matching = tzList.find((tz) =>
-                tz.includes(`UTC${offsetHours === '0' ? '' : offsetHours}`)
-            );
-            if (matching) {
-                timezone = matching;
-            }
-        }
-
-        const tzResponse = await fetch(
-            `https://worldtimeapi.org/api/timezone/${timezone}`,
-            {
-                headers: {
-                    'User-Agent': 'michikusa_memory_app',
-                },
-            }
-        );
-
-        if (!tzResponse.ok) {
-            throw new Error(`WorldTimeAPI timezone error: ${tzResponse.status}`);
-        }
-
-        const tzData = await tzResponse.json();
-        const localDateTime = new Date(tzData.datetime);
-
-        return { timezone, localDateTime };
-    } catch (error) {
-        console.error('[Geolocation] WorldTimeAPI error:', error);
-        return null;
-    }
+function getTimezoneFromBrowser(): { timezone: string; localDateTime: Date } {
+    // ブラウザから現在のタイムゾーンを取得
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Tokyo';
+    const localDateTime = new Date();
+    
+    return { timezone, localDateTime };
 }
 
 /**
@@ -148,10 +95,10 @@ export async function getCountryCodeFromCoordinates(
 
         const data = await response.json();
 
-        // タイムゾーン情報を取得
-        const timezoneInfo = await getTimezoneFromCoordinates(latitude, longitude);
+        // タイムゾーン情報を取得（ブラウザから）
+        const timezoneInfo = getTimezoneFromBrowser();
 
-        const localDateTime = timezoneInfo?.localDateTime || new Date();
+        const localDateTime = timezoneInfo.localDateTime;
         const brightness = calculateBrightness(localDateTime.getHours());
 
         return {
@@ -160,7 +107,7 @@ export async function getCountryCodeFromCoordinates(
             countryCode: data.address?.country_code?.toUpperCase() || 'JP',
             countryName: data.address?.country || 'Japan',
             region: data.address?.state || data.address?.province,
-            timezone: timezoneInfo?.timezone || 'Asia/Tokyo',
+            timezone: timezoneInfo.timezone,
             localDateTime,
             brightness,
         };
