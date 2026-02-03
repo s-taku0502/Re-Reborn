@@ -223,7 +223,7 @@ export default function SetupPage() {
                 <p className={styles.description}>
                     {mode === 'signup' ? (
                         <>
-                            散歩Rebornを始めるために、<br />
+                            michikusa_memoryを始めるために、<br />
                             ユーザーIDとバックアップ用パスワードを設定してください。
                         </>
                     ) : (

@@ -15,7 +15,7 @@ const GEMINI_API_KEY = process.env.AI_PROVIDER_API_KEY || process.env.GEMINI_API
 // モデル名を環境変数から取得。未設定の場合は 'gemini-1.5-flash-latest' を使用
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash-latest';
 
-const SYSTEM_PROMPT = `あなたは「散歩Reborn」という散歩アプリのミッション生成AIです。
+const SYSTEM_PROMPT = `あなたは「michikusa_memory」という散歩アプリのミッション生成AIです。
 ユーザーに散歩のミッションを与える役割を持っています。
 
 ## お題生成の制約:

@@ -1,4 +1,4 @@
-# 散歩Reborn
+# michikusa_memory
 
 日常の散歩を、**ミッション**によって非日常の冒険に変える位置情報連動型PWA。
 
@@ -143,4 +143,4 @@ michikusa_memory/
 
 ---
 
-**散歩Reborn** - 今日の散歩に、小さな意味を。
+**michikusa_memory** - 今日の散歩に、小さな意味を。

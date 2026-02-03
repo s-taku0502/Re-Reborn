@@ -25,7 +25,7 @@ export default function Home() {
     return (
         <div className={styles.container}>
             <main className={styles.main}>
-                <h1 className={styles.title}>散歩Reborn</h1>
+                <h1 className={styles.title}>michikusa_memory</h1>
                 <p className={styles.subtitle}>今日の散歩に、</p>
                 <p className={styles.subtitle}>小さな意味を。</p>
 
