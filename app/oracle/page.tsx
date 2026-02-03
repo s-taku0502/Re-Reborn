@@ -6,6 +6,7 @@ import missionsData from '@/data/missions.json';
 import { Mission } from '@/lib/types';
 import { WalkingPersonLoader } from '@/app/components/WalkingPersonLoader';
 import styles from './oracle.module.css';
+import { getLocationInfo } from '@/lib/geolocation';
 
 export default function OraclePage() {
     const router = useRouter();
@@ -31,16 +32,43 @@ export default function OraclePage() {
 
     const generateNewMission = async () => {
         setIsLoading(true);
+
+        // 位置情報とタイムゾーンを取得（オプション）
+        let locationInfo = null;
+        let brightnessLevel = 'day';
+        let localHour = new Date().getHours();
+
+        try {
+            locationInfo = await getLocationInfo();
+            if (locationInfo) {
+                console.log('[Oracle] Location info:', locationInfo);
+                brightnessLevel = locationInfo.brightness;
+                if (locationInfo.localDateTime) {
+                    localHour = locationInfo.localDateTime.getHours();
+                }
+            }
+        } catch (error) {
+            console.warn('[Oracle] Failed to get location info:', error);
+        }
+
         // AI生成を試みる
         try {
-            const timeOfDay = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening';
+            const timeOfDay = localHour < 12 ? 'morning' : localHour < 18 ? 'afternoon' : 'evening';
             const response = await fetch('/api/ai/mission', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     context: {
                         timeOfDay,
+                        brightness: brightnessLevel,
                         weather: 'clear',
+                        location: locationInfo ? {
+                            countryCode: locationInfo.countryCode,
+                            countryName: locationInfo.countryName,
+                            region: locationInfo.region,
+                            timezone: locationInfo.timezone,
+                            localDateTime: locationInfo.localDateTime?.toISOString(),
+                        } : undefined,
                     },
                 }),
             });

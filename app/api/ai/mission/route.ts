@@ -1,3 +1,42 @@
+/**
+ * AI ミッション生成 API
+ * 
+ * 使用外部API:
+ * - Google Generative AI (Gemini API)
+ *   URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-*:generateContent
+ *   用途: ユーザーの時間帯・天候・位置情報・タイムゾーン・明るさに基づいて
+ *        パーソナライズされたミッション（お題）を生成
+ *   認証: API キー (環境変数: AI_PROVIDER_API_KEY または GEMINI_API_KEY)
+ *   モデル: gemini-1.5-flash-latest (高速・低コスト)
+ * 
+ * リクエスト形式:
+ * POST /api/ai/mission
+ * {
+ *   "context": {
+ *     "timeOfDay": "morning" | "afternoon" | "evening",
+ *     "brightness": "dark" | "early_morning" | "morning" | "afternoon" | "evening" | "night",
+ *     "weather": "clear" | "rainy" | ... ,
+ *     "location": {
+ *       "countryCode": "JP",
+ *       "countryName": "Japan",
+ *       "region": "Tokyo",
+ *       "timezone": "Asia/Tokyo",
+ *       "localDateTime": "2026-02-04T12:34:56Z"
+ *     }
+ *   }
+ * }
+ * 
+ * レスポンス形式:
+ * {
+ *   "id": "ai_1744123496000",
+ *   "text": "公園で一番大きな木の写真を撮る",
+ *   "category": "observe",
+ *   "difficulty": 2,
+ *   "source": "ai",
+ *   "reason": "昼間の公園で観察系のミッションを提案"
+ * }
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { getRandomFallbackMission } from '@/data/fallbackMissions';
@@ -46,20 +85,7 @@ const SYSTEM_PROMPT = `あなたは「michikusa_memory」という散歩アプ�
 - 危険な場所に行く（安全性）
 - 長時間かかるもの（散歩の範囲を超える）
 
-## ユーザーの現在の状況に基づいてお題を生成してください。
-- 時間帯（例: 朝、昼、夕方、夜）
-- 天候（例: 晴れ、雨、曇り、雪）
-
-## 単語の注意点:
-- "observe": 周囲の環境や自然、建物、人々の様子を観察するお題
-- "move": 散歩中に特定の動きを伴うお題
-- "mood": ユーザーの気分や心の状態に働きかけるお題
-
-## 出力単語の注意点:
-- 一般的な知力を順守してください。
-- 出力キーワードはランダムにしてください。
-- 出力キーワードは多様にしてください。
-- 出力キーワードは創造的にしてください。`;
+## ユーザーの`;
 
 function getRandomFallback() {
     const mission = getRandomFallbackMission();
@@ -72,18 +98,28 @@ function getRandomFallback() {
     };
 }
 
+function getBrightnessDescription(brightness: string): string {
+    const descriptions: Record<string, string> = {
+        dark: '暗い（夜中）',
+        early_morning: '薄暗い（早朝）',
+        morning: '明るい（朝）',
+        afternoon: '非常に明るい（昼間）',
+        evening: '薄暗くなっている（夕方）',
+        night: '暗い（夜）',
+    };
+    return descriptions[brightness] || brightness;
+}
+
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const context = body?.context || {};
         const timeOfDay = context.timeOfDay || 'day';
         const weather = context.weather || 'clear';
+        const location = context.location || {};
 
         // デバッグ情報
-        console.log('[AI Mission] API Key exists:', !!GEMINI_API_KEY);
-        if (GEMINI_API_KEY) {
-            console.log('[AI Mission] API Key prefix:', GEMINI_API_KEY.substring(0, 10) + '...');
-        }
+        console.log('[AI Mission] Context:', { timeOfDay, weather, location });
 
         // AI未設定の場合はフォールバック
         if (!GEMINI_API_KEY) {
@@ -119,9 +155,17 @@ export async function POST(req: NextRequest) {
             ],
         });
 
+        const locationInfo = location.countryCode
+            ? `\n- 国: ${location.countryName}（${location.countryCode}）${location.region ? `\n- 地域: ${location.region}` : ''}${location.timezone ? `\n- タイムゾーン: ${location.timezone}` : ''}`
+            : '';
+
+        const brightnessInfo = context.brightness
+            ? `\n- 明るさ: ${getBrightnessDescription(context.brightness)}`
+            : '';
+
         const userPrompt = `現在の状況:
 - 時間帯: ${timeOfDay}
-- 天候: ${weather}
+- 天候: ${weather}${brightnessInfo}${locationInfo}
 
 上記を考慮して、散歩のお題を1つ生成してください。JSON形式で返してください。`;
 
@@ -157,9 +201,18 @@ export async function POST(req: NextRequest) {
         try {
             missionData = JSON.parse(jsonStr);
         } catch (parseError) {
-            console.error('[AI Mission] Failed to parse JSON from response, using fallback.', parseError);
-            console.error('[AI Mission] Original content:', content);
-            return NextResponse.json(getRandomFallback());
+            // JSON パースエラー時、一般的なエスケープエラーを自動修正
+            console.error('[AI Mission] Initial JSON parse failed, attempting to fix...', parseError);
+            try {
+                // ダブルクォートのエスケープエラーを修正（例: ""difficulty" -> "difficulty"）
+                const fixedJsonStr = jsonStr.replace(/""+([a-zA-Z_][a-zA-Z0-9_]*)":/g, '"$1":');
+                missionData = JSON.parse(fixedJsonStr);
+                console.log('[AI Mission] JSON fixed and parsed successfully');
+            } catch (fixError) {
+                console.error('[AI Mission] Failed to parse JSON from response, using fallback.', fixError);
+                console.error('[AI Mission] Original content:', content);
+                return NextResponse.json(getRandomFallback());
+            }
         }
 
 

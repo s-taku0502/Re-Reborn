@@ -9,6 +9,10 @@ export const metadata: Metadata = {
         template: '%s | michikusa_memory',
     },
     description: '散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
+    
+    // OG画像解決用のbaseURL設定
+    metadataBase: new URL('https://michikusa-memory.vercel.app'),
+    
     formatDetection: {
         email: false,
         telephone: false,
@@ -52,7 +56,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: 'website',
         locale: 'ja_JP',
-        url: 'https://sanpo-reborn.vercel.app/',
+        url: 'https://michikusa-memory.vercel.app/',
         siteName: 'michikusa_memory',
         title: '散歩が冒険になる - michikusa_memory',
         description: 'いつもの散歩が、AIミッションで非日常の冒険に。運動不足・ストレス解消・新しい発見。毎日がちょっと楽しくなる無料アプリ。',
@@ -101,10 +105,10 @@ export const metadata: Metadata = {
     
     // カノニカルURL
     alternates: {
-        canonical: 'https://sanpo-reborn.vercel.app/',
+        canonical: 'https://michikusa-memory.vercel.app/',
         languages: {
-            'ja': 'https://sanpo-reborn.vercel.app/',
-            'x-default': 'https://sanpo-reborn.vercel.app/',
+            'ja': 'https://michikusa-memory.vercel.app/',
+            'x-default': 'https://michikusa-memory.vercel.app/',
         },
     },
     
@@ -113,8 +117,6 @@ export const metadata: Metadata = {
     
     // その他のメタデータ
     referrer: 'strict-origin-when-cross-origin',
-    themeColor: '#4CAF50',
-    colorScheme: 'light dark',
 };
 
 export const viewport: Viewport = {
@@ -134,8 +136,8 @@ export default function RootLayout({
         <html lang="ja">
             <head>
                 {/* hreflang タグ */}
-                <link rel="alternate" hrefLang="ja" href="https://sanpo-reborn.vercel.app/" />
-                <link rel="alternate" hrefLang="x-default" href="https://sanpo-reborn.vercel.app/" />
+                <link rel="alternate" hrefLang="ja" href="https://michikusa-memory.vercel.app/" />
+                <link rel="alternate" hrefLang="x-default" href="https://michikusa-memory.vercel.app/" />
                 
                 {/* 構造化データ (JSON-LD) - Google検索結果強化 */}
                 <script
@@ -146,7 +148,7 @@ export default function RootLayout({
                             '@type': 'MobileApplication',
                             name: 'michikusa_memory',
                             alternativeName: '散歩が冒険になる',
-                            url: 'https://sanpo-reborn.vercel.app/',
+                            url: 'https://michikusa-memory.vercel.app/',
                             applicationCategory: 'HealthApplication',
                             operatingSystem: 'Any',
                             browserRequirements: 'Requires JavaScript enabled',
@@ -161,7 +163,7 @@ export default function RootLayout({
                             author: {
                                 '@type': 'Organization',
                                 name: 'michikusa_memory',
-                                url: 'https://sanpo-reborn.vercel.app/',
+                                url: 'https://michikusa-memory.vercel.app/',
                             },
                             aggregateRating: {
                                 '@type': 'AggregateRating',

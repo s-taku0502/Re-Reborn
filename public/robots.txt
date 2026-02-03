@@ -29,4 +29,4 @@ Disallow: /album
 Disallow: /mypage
 
 # サイトマップ
-Sitemap: https://sanpo-reborn.vercel.app/sitemap.xml
+Sitemap: https://michikusa-memory.vercel.app/sitemap.xml

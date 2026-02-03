@@ -23,8 +23,15 @@
 - **データ管理**: Firebase Firestore (SSOT) + LocalStorageキャッシュ
 - **画像管理**: Cloudinary (動的変換・最適化)
 - **認証**: bcrypt + サーバー側検証 (API Routes)
+- **AI**: Google Generative AI (Gemini API) - ミッション生成
 - **セキュリティ**: CSP, レート制限, 入力サニタイズ
 - **PWA**: Progressive Web App 対応
+
+## 🌍 外部API
+
+- **Google Generative AI (Gemini API)**: AI ミッション生成。ユーザーの時間帯・天候・位置情報・タイムゾーンに基づいてパーソナライズされたミッションを自動生成
+- **Nominatim (Open Street Map)**: リバースジオコーディング。ユーザーの緯度経度から国コードと地域情報を取得
+- **WorldTimeAPI**: タイムゾーン取得。ユーザーの位置情報から現地時間とタイムゾーン情報を取得し、明るさレベルを自動判定
 
 ## 📦 セットアップ
 
