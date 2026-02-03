@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import missionsData from '@/data/missions.json';
 import { Mission } from '@/lib/types';
+import { WalkingPersonLoader } from '@/app/components/WalkingPersonLoader';
 import styles from './oracle.module.css';
 
 export default function OraclePage() {
@@ -13,6 +14,7 @@ export default function OraclePage() {
     const [isStarted, setIsStarted] = useState(false);
     const [startTime, setStartTime] = useState<Date | null>(null);
     const [elapsedMinutes, setElapsedMinutes] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // ユーザーIDチェック
@@ -28,6 +30,7 @@ export default function OraclePage() {
     }, [router]);
 
     const generateNewMission = async () => {
+        setIsLoading(true);
         // AI生成を試みる
         try {
             const timeOfDay = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening';
@@ -48,6 +51,7 @@ export default function OraclePage() {
                 setIsStarted(false);
                 setStartTime(null);
                 setElapsedMinutes(0);
+                setIsLoading(false);
                 return;
             }
         } catch (error) {
@@ -61,6 +65,7 @@ export default function OraclePage() {
         setIsStarted(false);
         setStartTime(null);
         setElapsedMinutes(0);
+        setIsLoading(false);
     };
 
     useEffect(() => {
@@ -90,10 +95,16 @@ export default function OraclePage() {
         }
     };
 
-    if (!currentMission || !userId) {
+    if (!currentMission || !userId || isLoading) {
         return (
             <div className={styles.container}>
-                <div className={styles.loading}>読み込み中...</div>
+                <main className={styles.main}>
+                    <h1 className={styles.header}>今日のミッション</h1>
+                    <div className={styles.loadingContainer}>
+                        <WalkingPersonLoader />
+                        <p className={styles.loadingText}>お題を生成中...</p>
+                    </div>
+                </main>
             </div>
         );
     }
