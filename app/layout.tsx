@@ -148,6 +148,8 @@ export default function RootLayout({
     return (
         <html lang="ja">
             <head>
+                {/* Permissions Policy for camera access */}
+                <meta name="permissions-policy" content="camera=*, microphone=*" />
                 {/* hreflang タグ */}
                 <link rel="alternate" hrefLang="ja" href="https://michikusa-memory.vercel.app/" />
                 <link rel="alternate" hrefLang="x-default" href="https://michikusa-memory.vercel.app/" />
