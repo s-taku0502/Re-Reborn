@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 質問・相談
+    url: https://github.com/あなたのユーザー名/リポジトリ名/discussions
+    about: 実装相談・設計相談はこちら
