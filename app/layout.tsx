@@ -154,6 +154,18 @@ export default function RootLayout({
                 <link rel="alternate" hrefLang="ja" href="https://michikusa-memory.vercel.app/" />
                 <link rel="alternate" hrefLang="x-default" href="https://michikusa-memory.vercel.app/" />
                 
+                {/* Chrome推奨通知用スタイル */}
+                <style>{`
+                  .chrome-recommendation-br {
+                    display: none;
+                  }
+                  @media (max-width: 768px) {
+                    .chrome-recommendation-br {
+                      display: inline;
+                    }
+                  }
+                `}</style>
+                
                 {/* 構造化データ (JSON-LD) - Google検索結果強化 */}
                 <script
                     type="application/ld+json"
@@ -231,6 +243,28 @@ export default function RootLayout({
                 />
             </head>
             <body>
+                {/* Google Chrome推奨通知 */}
+                <div
+                    style={{
+                        backgroundColor: '#fff3cd',
+                        border: '1px solid #ffc107',
+                        borderRadius: '4px',
+                        padding: '12px 16px',
+                        margin: '0',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        color: '#856404',
+                        fontWeight: '500',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
+                        lineBreak: 'loose',
+                    }}
+                >
+                    このアプリは Google Chrome での利用を推奨しています。
+                    <br className="chrome-recommendation-br" />
+                    最適な体験のため、Chrome のご使用をお願いします。
+                </div>
+
                 {/* Google Analytics */}
                 <Script
                     strategy="afterInteractive"
