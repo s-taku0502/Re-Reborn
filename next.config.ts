@@ -9,7 +9,7 @@ const csp = [
 	`script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://apis.google.com https://*.googleapis.com https://*.gstatic.com https://pagead2.googlesyndication.com https://*.adtrafficquality.google`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://res.cloudinary.com https://www.googletagmanager.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
-    "connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://*.cloudinary.com https://nominatim.openstreetmap.org https://www.google-analytics.com https://analytics.google.com https://ep1.adtrafficquality.google https://*.doubleclick.net https://*.google.com",
+    "connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://*.cloudinary.com https://nominatim.openstreetmap.org https://www.google-analytics.com https://analytics.google.com https://ep1.adtrafficquality.google https://*.doubleclick.net https://*.google.com https://pagead2.googlesyndication.com",
     "font-src 'self'",
     "frame-src https://accounts.google.com https://*.firebaseapp.com https://*.doubleclick.net https://*.google.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google",
 ].join('; ');
