@@ -15,12 +15,15 @@
 }
 
 .title {
-    font-size: 2.8rem;
+    font-size: clamp(2rem, 6vw, 2.8rem);
     font-weight: 300;
-    letter-spacing: 0.15em;
+    letter-spacing: clamp(0.08em, 1.2vw, 0.15em);
+    line-height: 1.2;
     margin-bottom: 2rem;
     color: #333;
-    white-space: nowrap;
+    text-wrap: balance;
+    line-break: strict;
+    word-break: keep-all;
 }
 
 .subtitle {
@@ -85,10 +88,7 @@
 }
 
 @media (max-width: 640px) {
-    .title {
-        font-size: 2.3rem;
-    }
-
+    /* remove .title override; clamp handles it */
     .subtitle {
         font-size: 1.1rem;
     }
