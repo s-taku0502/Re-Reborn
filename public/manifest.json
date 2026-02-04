@@ -19,14 +19,8 @@
     "prefer_related_applications": false,
     "icons": [
         {
-            "src": "/icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "/icon-512.png",
-            "sizes": "512x512",
+            "src": "/app_icon_joyful_stroll.png",
+            "sizes": "any",
             "type": "image/png",
             "purpose": "any maskable"
         }
@@ -42,14 +36,14 @@
             "short_name": "ミッション",
             "description": "今日のミッションを受信する",
             "url": "/oracle?source=shortcut",
-            "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"}]
+            "icons": [{"src": "/app_icon_joyful_stroll.png", "sizes": "any", "type": "image/png"}]
         },
         {
             "name": "冒険の書",
             "short_name": "アルバム",
             "description": "これまでの散歩記録を確認",
             "url": "/album?source=shortcut",
-            "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"}]
+            "icons": [{"src": "/app_icon_joyful_stroll.png", "sizes": "any", "type": "image/png"}]
         }
     ]
 }

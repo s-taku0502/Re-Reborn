@@ -69,7 +69,7 @@ export const metadata: Metadata = {
         description: 'みちくさメモリーは、いつもの散歩をAIミッションで非日常の冒険に。運動不足・ストレス解消・新しい発見。毎日がちょっと楽しくなる無料アプリ。',
         images: [
             {
-                url: '/icon-512.png',
+                url: '/app_icon_joyful_stroll.png',
                 width: 512,
                 height: 512,
                 alt: 'みちくさメモリー (michikusa_memory) - 散歩がゲームのように楽しくなるアプリ',
@@ -82,7 +82,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: 'みちくさメモリー - 散歩が冒険になる',
         description: 'みちくさメモリーでAIミッションを受けて、いつもの散歩を冒険に。運動不足解消・メンタルケア・新しい発見。散歩が楽しくなる無料アプリ。',
-        images: ['/icon-512.png'],
+        images: ['/app_icon_joyful_stroll.png'],
         creator: '@michikusa_memory',
         site: '@michikusa_memory',
     },
@@ -104,6 +104,10 @@ export const metadata: Metadata = {
     
     // アプリ設定
     manifest: '/manifest.json',
+    icons: {
+        icon: '/favicon.ico',
+        apple: '/app_icon_joyful_stroll.png',
+    },
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
@@ -180,7 +184,7 @@ export default function RootLayout({
                                 bestRating: '5',
                                 worstRating: '1',
                             },
-                            screenshot: ['/icon-512.png', '/icon-192.png'],
+                            screenshot: ['/app_icon_joyful_stroll.png'],
                             inLanguage: 'ja',
                         }),
                     }}
