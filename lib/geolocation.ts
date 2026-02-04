@@ -80,17 +80,11 @@ export async function getCountryCodeFromCoordinates(
 ): Promise<GeoLocation> {
     try {
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-            {
-                headers: {
-                    'Accept-Language': 'ja',
-                    'User-Agent': 'michikusa_memory_app',
-                },
-            }
+            `/api/geocode?lat=${latitude}&lon=${longitude}`
         );
 
         if (!response.ok) {
-            throw new Error(`Nominatim API error: ${response.status}`);
+            throw new Error(`Geocode API error: ${response.status}`);
         }
 
         const data = await response.json();

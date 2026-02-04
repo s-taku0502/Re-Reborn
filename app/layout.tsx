@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import ServiceWorkerRegistration from './ServiceWorkerRegistration';
 
@@ -227,6 +228,23 @@ export default function RootLayout({
                 />
             </head>
             <body>
+                {/* Google Analytics */}
+                <Script
+                    strategy="afterInteractive"
+                    src="https://www.googletagmanager.com/gtag/js?id=G-V51YH5JYTD"
+                />
+                <Script
+                    id="google-analytics"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            window.dataLayer = window.dataLayer || [];
+                            function gtag(){dataLayer.push(arguments);}
+                            gtag('js', new Date());
+                            gtag('config', 'G-V51YH5JYTD');
+                        `,
+                    }}
+                />
                 <ServiceWorkerRegistration />
                 {children}
             </body>

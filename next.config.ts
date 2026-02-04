@@ -6,11 +6,12 @@ const csp = [
     "base-uri 'self'",
     "object-src 'none'",
     "frame-ancestors 'none'",
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://apis.google.com https://*.googleapis.com https://*.gstatic.com`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://res.cloudinary.com",
-    "connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://*.cloudinary.com https://nominatim.openstreetmap.org",
+    "img-src 'self' data: blob: https://res.cloudinary.com https://www.googletagmanager.com",
+    "connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://*.cloudinary.com https://nominatim.openstreetmap.org https://www.google-analytics.com https://analytics.google.com",
     "font-src 'self'",
+    "frame-src https://accounts.google.com https://*.firebaseapp.com",
 ].join('; ');
 
 const securityHeaders = [
