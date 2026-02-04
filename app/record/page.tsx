@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Mission, UserLog } from '@/lib/types';
 import { getErrorMessage, showErrorNotification, checkImageSize } from '@/lib/errorHandler';
 import { isCloudinaryConfigured, uploadImageFile } from '@/lib/cloudinary';
+import { compressImageToBase64, compressImageToFile, formatFileSize } from '@/lib/imageCompression';
 import { MAX_LOCATION_LENGTH, MAX_MEMO_LENGTH, sanitizeTextInput, validateLocation, validateMemo } from '@/lib/validation';
 import styles from './record.module.css';
 
@@ -49,31 +50,50 @@ function RecordContent() {
         }
     }, [router, searchParams]);
 
-    const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            // 画像サイズチェック（5MB制限）
-            const sizeError = checkImageSize(file, 5);
+        if (!file) return;
+
+        try {
+            setUploadMessage('画像を圧縮中...');
+
+            // 画像を圧縮（1024x1024、品質80%）
+            const compressedFile = await compressImageToFile(file, {
+                maxWidth: 1024,
+                maxHeight: 1024,
+                quality: 0.8,
+            });
+
+            // 圧縮後のサイズをログ出力
+            console.log(`元のサイズ: ${formatFileSize(file.size)}`);
+            console.log(`圧縮後: ${formatFileSize(compressedFile.size)}`);
+
+            // 圧縮後も5MBチェック
+            const sizeError = checkImageSize(compressedFile, 5);
             if (sizeError) {
                 showErrorNotification(sizeError);
-                // エラー時はinputをリセット
+                setUploadMessage(null);
                 e.target.value = '';
                 return;
             }
 
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImageData(reader.result as string);
-                // キャプチャ成功時はinputをリセット
+            setImageFile(compressedFile);
+
+            // Base64に変換して表示
+            const base64 = await compressImageToBase64(compressedFile);
+            setImageData(base64);
+            setUploadMessage(`画像を圧縮しました: ${formatFileSize(compressedFile.size)}`);
+
+            // 処理終了後にリセット
+            setTimeout(() => {
+                setUploadMessage(null);
                 e.target.value = '';
-            };
-            reader.onerror = () => {
-                console.error('FileReader error');
-                showErrorNotification('画像の読み込みに失敗しました');
-                e.target.value = '';
-            };
-            reader.readAsDataURL(file);
+            }, 2000);
+        } catch (error) {
+            console.error('Image compression failed:', error);
+            showErrorNotification('画像の圧縮に失敗しました');
+            setUploadMessage(null);
+            e.target.value = '';
         }
     };
 

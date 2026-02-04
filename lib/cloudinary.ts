@@ -81,6 +81,11 @@ export async function uploadToCloudinary(
     formData.append('upload_preset', cloudinaryConfig.uploadPreset);
     formData.append('folder', `michikusa_memory/${userId}`);
     formData.append('timestamp', Date.now().toString());
+    
+    // Cloudinary側での圧縮設定
+    formData.append('quality', 'auto'); // 自動品質調整
+    formData.append('fetch_format', 'auto'); // 自動フォーマット選択（WebP優先）
+    formData.append('flags', 'progressive'); // プログレッシブJPEG
 
     console.log('Cloudinary upload folder:', `michikusa_memory/${userId}`);
 
