@@ -1,6 +1,28 @@
 # Robots.txt for michikusa_memory
 # 本ファイルは検索エンジンのクロール方針を定義します
 
+# Google AdSense クローラー（最優先で許可）
+User-agent: AdsBot-Google
+Allow: /
+Crawl-delay: 0
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
+Crawl-delay: 0
+
+User-agent: Googlebot-Image
+Allow: /
+
+# Google 検索クローラー
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
 # すべてのロボットに対する指示
 User-agent: *
 Allow: /
@@ -11,22 +33,13 @@ Disallow: /api/
 # Next.js ビルド生成物（実装詳細）
 Disallow: /_next/
 
-# Google
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-# Bing
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
 # 認証が必要なページ（検索エンジンがクロール不要）
 Disallow: /setup
 Disallow: /oracle
 Disallow: /record
 Disallow: /album
 Disallow: /mypage
+Disallow: /admin
 
 # サイトマップ
 Sitemap: https://michikusa-memory.vercel.app/sitemap.xml

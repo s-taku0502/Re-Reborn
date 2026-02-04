@@ -37,6 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // 公開ページのみをサイトマップに含める
     const routes = [
         { path: '/', priority: 1.0, changeFrequency: 'daily' as const },
+        { path: '/contact', priority: 0.8, changeFrequency: 'monthly' as const },
         { path: '/setup', priority: 0.7, changeFrequency: 'monthly' as const },
     ];
 
