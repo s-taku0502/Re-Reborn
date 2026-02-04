@@ -136,7 +136,7 @@ export const viewport: Viewport = {
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
-    themeColor: '#1976D2',  // 空色に変更
+    themeColor: '#00bcd4',  // 水色に統一
     viewportFit: 'cover',
 };
 

@@ -4,10 +4,11 @@
     "description": "みちくさメモリーはAI生成ミッションで散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が非日常の冒険に変わる。",
     "start_url": "/",
     "scope": "/",
-    "display": "standalone",
+    "display": "minimal-ui",
     "background_color": "#fafafa",
-    "theme_color": "#4CAF50",
+    "theme_color": "#00bcd4",
     "orientation": "portrait",
+    "color_scheme": "light",
     "categories": [
         "health",
         "fitness",
