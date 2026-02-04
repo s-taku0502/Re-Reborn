@@ -209,6 +209,12 @@ export default function OraclePage() {
                 >
                     ⟹ 行動をキャンセルする
                 </button>
+　　
+                <div className={styles.footer}>
+                    <button onClick={() => router.push('/contact')} className={styles.contactButton}>
+                        📧 お問い合わせ
+                    </button>
+                </div>
             </main>
         </div>
     );

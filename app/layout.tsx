@@ -209,7 +209,7 @@ export default function RootLayout({
                 />
 
                 {/* Google AdSense */}
-                <script
+                <Script
                     async
                     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8577012795231841"
                     crossOrigin="anonymous"

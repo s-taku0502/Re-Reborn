@@ -429,6 +429,15 @@ export default function MyPage() {
                         </div>
                     )}
                 </div>
+
+                <div className={styles.section}>
+                    <button onClick={() => router.push('/contact')} className={styles.contactButton}>
+                        📧 お問い合わせ
+                    </button>
+                    <p className={styles.note}>
+                        ご質問・ご意見・不具合報告などお気軽にお問い合わせください
+                    </p>
+                </div>
             </main>
         </div>
         </>

@@ -45,6 +45,12 @@ export default function Home() {
                         </button>
                     </nav>
                 )}
+
+                <div className={styles.footer}>
+                    <button onClick={() => router.push('/contact')} className={styles.contactButton}>
+                        📧 お問い合わせ
+                    </button>
+                </div>
             </main>
         </div>
     );

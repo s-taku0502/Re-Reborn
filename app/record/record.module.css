@@ -206,6 +206,31 @@
     cursor: not-allowed;
 }
 
+.footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.contactButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    background-color: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.contactButton:hover {
+    background-color: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
 @media (max-width: 640px) {
     .container {
         padding: 20px 15px;
