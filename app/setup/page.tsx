@@ -223,7 +223,7 @@ export default function SetupPage() {
                 <p className={styles.description}>
                     {mode === 'signup' ? (
                         <>
-                            michikusa_memoryを始めるために、<br />
+                            みちくさメモリーを始めるために、<br />
                             ユーザーIDとバックアップ用パスワードを設定してください。
                         </>
                     ) : (
