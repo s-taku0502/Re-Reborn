@@ -67,8 +67,8 @@ export const metadata: Metadata = {
         locale: 'ja_JP',
         url: 'https://michikusa-memory.com/',
         siteName: 'みちくさメモリー (michikusa_memory)',
-        title: 'みちくさメモリー - 散歩が冒険になる',
-        description: 'みちくさメモリーは、いつもの散歩をAIミッションで非日常の冒険に。運動不足・ストレス解消・新しい発見。毎日がちょっと楽しくなる無料アプリ。',
+        title: 'みちくさメモリー \n - 散歩が冒険になる',
+        description: 'みちくさメモリーは、いつもの散歩をAIミッションで非日常の冒険に。運動不足・ストレス解消・新しい発見。毎日がちょっと楽しくなる無料アプリです。もっと気軽に、もっと楽しく、みちくさメモリーと一緒に散歩へ出かけましょう！',
         images: [
             {
                 url: '/app_icon_joyful_stroll.png',
@@ -83,7 +83,7 @@ export const metadata: Metadata = {
     twitter: {
         card: 'summary_large_image',
         title: 'みちくさメモリー - 散歩が冒険になる',
-        description: 'みちくさメモリーでAIミッションを受けて、いつもの散歩を冒険に。運動不足解消・メンタルケア・新しい発見。散歩が楽しくなる無料アプリ。',
+        description: 'みちくさメモリーでAIミッションを受けて、いつもの散歩を冒険に。運動不足解消・メンタルケア・新しい発見。散歩が楽しくなる無料アプリです。',
         images: ['/app_icon_joyful_stroll.png'],
         creator: '@michikusa_memory',
         site: '@michikusa_memory',
@@ -255,7 +255,7 @@ export default function RootLayout({
             </head>
             <body>
                 {/* Google Chrome推奨通知 */}
-                <div
+                {/* <div
                     style={{
                         backgroundColor: '#fff3cd',
                         border: '1px solid #ffc107',
@@ -274,7 +274,7 @@ export default function RootLayout({
                     このアプリは Google Chrome での利用を推奨しています。
                     <br className="chrome-recommendation-br" />
                     最適な体験のため、Chrome のご使用をお願いします。
-                </div>
+                </div> */}
 
                 {/* Google Analytics */}
                 <Script
