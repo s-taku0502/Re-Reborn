@@ -18,16 +18,28 @@ export default function OraclePage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // ユーザーIDチェック
-        const storedUserId = localStorage.getItem('reborn_userId');
-        if (!storedUserId) {
-            router.push('/setup');
-            return;
-        }
-        setUserId(storedUserId);
+        let isMounted = true;
 
-        // ランダムにミッションを選択
-        generateNewMission();
+        const initMission = async () => {
+            // ユーザーIDチェック
+            const storedUserId = localStorage.getItem('reborn_userId');
+            if (!storedUserId) {
+                router.push('/setup');
+                return;
+            }
+
+            if (isMounted) {
+                setUserId(storedUserId);
+                // ランダムにミッションを選択
+                await generateNewMission();
+            }
+        };
+
+        initMission();
+
+        return () => {
+            isMounted = false;
+        };
     }, [router]);
 
     const generateNewMission = async () => {
