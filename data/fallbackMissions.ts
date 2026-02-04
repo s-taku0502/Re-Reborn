@@ -80,6 +80,22 @@ export const FALLBACK_MISSIONS: FallbackMission[] = [
     { text: '季節の良さを感じる風景を撮影する', category: 'mood', difficulty: 3 },
     { text: '思い出に残したい景色を撮影する', category: 'mood', difficulty: 3 },
     { text: '今日1日を象徴する景色を撮る', category: 'mood', difficulty: 3 },
+
+    // 時間制約付きミッション - move系
+    { text: '3分歩いた先の景色を撮影する', category: 'move', difficulty: 2 },
+    { text: '5分歩いた先のお店を撮影する', category: 'move', difficulty: 3 },
+    { text: '10分歩いた先の建物を撮る', category: 'move', difficulty: 3 },
+    { text: '2分以内に面白いものを見つけて撮る', category: 'observe', difficulty: 2 },
+    { text: '5分以内に花を3つ見つけて撮影する', category: 'observe', difficulty: 3 },
+    { text: '7分歩いた先の公園や広場を撮影する', category: 'move', difficulty: 3 },
+    { text: '3分後の景色を記録する', category: 'move', difficulty: 2 },
+    { text: '5分間歩いて一番気に入った景色を撮る', category: 'mood', difficulty: 3 },
+    { text: '10分後に到着した場所を撮影する', category: 'move', difficulty: 4 },
+    { text: '8分歩いた先の交差点の景色を撮る', category: 'move', difficulty: 3 },
+    { text: '4分以内に赤いものを見つけて撮影する', category: 'observe', difficulty: 3 },
+    { text: '6分歩いた先のお気に入りスポットを撮る', category: 'move', difficulty: 3 },
+    { text: '15分歩いた先のお店を撮影する', category: 'move', difficulty: 4 },
+    { text: '3分以内に癒される景色を見つけて撮る', category: 'mood', difficulty: 2 },
 ];
 
 /**
