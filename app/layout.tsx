@@ -208,6 +208,13 @@ export default function RootLayout({
                     }}
                 />
 
+                {/* Google AdSense */}
+                <script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8577012795231841"
+                    crossOrigin="anonymous"
+                    strategy="afterInteractive" />
+
                 {/* FAQ構造化データ */}
                 <script
                     type="application/ld+json"
