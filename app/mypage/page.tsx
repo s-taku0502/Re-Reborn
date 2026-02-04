@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 import { resetPassword } from '@/lib/password';
 import { verifyPassword } from '@/lib/password';
 import { deleteUserAccount, createBackupData, restoreLogsToFirestore } from '@/lib/firestore';
@@ -268,10 +269,28 @@ export default function MyPage() {
     }
 
     return (
-        <div className={styles.container}>
-            <main className={styles.main}>
-                <div className={styles.headerContainer}>
-                    <h1 className={styles.header}>マイページ</h1>
+        <>
+            {/* Google Analytics */}
+            <Script
+                strategy="afterInteractive"
+                src="https://www.googletagmanager.com/gtag/js?id=G-V51YH5JYTD"
+            />
+            <Script
+                id="google-analytics-mypage"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                    __html: `
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                        gtag('config', 'G-V51YH5JYTD');
+                    `,
+                }}
+            />
+            <div className={styles.container}>
+                <main className={styles.main}>
+                    <div className={styles.headerContainer}>
+                        <h1 className={styles.header}>マイページ</h1>
                     <button onClick={() => router.push('/')} className={styles.homeButton}>
                         ホーム
                     </button>
@@ -412,5 +431,6 @@ export default function MyPage() {
                 </div>
             </main>
         </div>
+        </>
     );
 }
