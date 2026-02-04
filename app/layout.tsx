@@ -150,6 +150,8 @@ export default function RootLayout({
             <head>
                 {/* Permissions Policy for camera access */}
                 <meta name="permissions-policy" content="camera=*, microphone=*" />
+                <meta name="google-adsense-account" content="ca-pub-8577012795231841" />
+
                 {/* hreflang タグ */}
                 <link rel="alternate" hrefLang="ja" href="https://michikusa-memory.vercel.app/" />
                 <link rel="alternate" hrefLang="x-default" href="https://michikusa-memory.vercel.app/" />
@@ -265,14 +267,6 @@ export default function RootLayout({
                     <br className="chrome-recommendation-br" />
                     最適な体験のため、Chrome のご使用をお願いします。
                 </div>
-
-                {/* Google AdSense */}
-                <Script
-                    async
-                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8577012795231841"
-                    crossOrigin="anonymous"
-                    strategy="afterInteractive"
-                />
 
                 {/* Google Analytics */}
                 <Script
