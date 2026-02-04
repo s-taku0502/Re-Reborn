@@ -169,6 +169,13 @@ export default function OraclePage() {
                     >
                         別のミッションを受ける
                     </button>
+
+                    <button
+                        onClick={() => router.push('/')}
+                        className={styles.secondaryButton}
+                    >
+                        ホームに戻る
+                    </button>
                 </main>
             </div>
         );
