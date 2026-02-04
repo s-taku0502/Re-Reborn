@@ -278,6 +278,8 @@ export default function RootLayout({
                     strategy="afterInteractive"
                     src="https://www.googletagmanager.com/gtag/js?id=G-V51YH5JYTD"
                 />
+
+                {/* Google Analytics && google ad setting */}
                 <Script
                     id="google-analytics"
                     strategy="afterInteractive"
