@@ -56,6 +56,8 @@ function RecordContent() {
             const sizeError = checkImageSize(file, 5);
             if (sizeError) {
                 showErrorNotification(sizeError);
+                // エラー時はinputをリセット
+                e.target.value = '';
                 return;
             }
 
@@ -63,6 +65,13 @@ function RecordContent() {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImageData(reader.result as string);
+                // キャプチャ成功時はinputをリセット
+                e.target.value = '';
+            };
+            reader.onerror = () => {
+                console.error('FileReader error');
+                showErrorNotification('画像の読み込みに失敗しました');
+                e.target.value = '';
             };
             reader.readAsDataURL(file);
         }
@@ -193,6 +202,7 @@ function RecordContent() {
                         {!imageData ? (
                             <label htmlFor="imageInput" className={styles.imageInputLabel}>
                                 <input
+                                    key={imageData ? 'hidden' : 'visible'}  // key を追加
                                     type="file"
                                     id="imageInput"
                                     accept="image/*"
