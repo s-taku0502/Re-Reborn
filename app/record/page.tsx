@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Mission, UserLog } from '@/lib/types';
 import { getErrorMessage, showErrorNotification, checkImageSize } from '@/lib/errorHandler';
 import { isCloudinaryConfigured, uploadImageFile } from '@/lib/cloudinary';
-import { compressImageToBase64, compressImageToFile, formatFileSize } from '@/lib/imageCompression';
+import { compressImageToFile, formatFileSize } from '@/lib/imageCompression';
 import { MAX_LOCATION_LENGTH, MAX_MEMO_LENGTH, sanitizeTextInput, validateLocation, validateMemo } from '@/lib/validation';
 import styles from './record.module.css';
 
@@ -15,8 +15,9 @@ function RecordContent() {
     const [userId, setUserId] = useState<string | null>(null);
     const [mission, setMission] = useState<Mission | null>(null);
     const [startTime, setStartTime] = useState<Date | null>(null);
-    const [imageData, setImageData] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [memo, setMemo] = useState('');
     const [location, setLocation] = useState('');
     const [isSaving, setIsSaving] = useState(false);
@@ -50,6 +51,14 @@ function RecordContent() {
         }
     }, [router, searchParams]);
 
+    useEffect(() => {
+        return () => {
+            if (previewUrl?.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
     const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -77,18 +86,42 @@ function RecordContent() {
                 return;
             }
 
-            setImageFile(compressedFile);
+            // 古いblob URLを解放
+            if (previewUrl && previewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl);
+            }
 
-            // Base64に変換して表示
-            const base64 = await compressImageToBase64(compressedFile);
-            setImageData(base64);
+            // メモリ効率的なプレビュー用URL作成
+            const objectUrl = URL.createObjectURL(compressedFile);
+            setPreviewUrl(objectUrl);
+            setImageFile(compressedFile);
             setUploadMessage(`画像を圧縮しました: ${formatFileSize(compressedFile.size)}`);
 
-            // 処理終了後にリセット
-            setTimeout(() => {
-                setUploadMessage(null);
-                e.target.value = '';
-            }, 2000);
+            // Cloudinaryに即座にアップロード（メモリ節約）
+            if (isCloudinaryConfigured() && userId) {
+                try {
+                    setUploadMessage('画像をアップロード中...');
+                    const uploadedUrl = await uploadImageFile(compressedFile, userId);
+                    setImageUrl(uploadedUrl);
+                    setImageFile(null); // アップロード完了後、ファイルは不要
+                    
+                    // blob URLを解放してメモリ節約
+                    if (objectUrl.startsWith('blob:')) {
+                        URL.revokeObjectURL(objectUrl);
+                    }
+                    setPreviewUrl(uploadedUrl); // Cloudinary URLでプレビュー
+                    setUploadMessage('画像アップロード完了');
+                    
+                    // 成功メッセージを2秒後に消す
+                    setTimeout(() => setUploadMessage(null), 2000);
+                } catch (uploadError) {
+                    console.error('Cloudinary upload failed:', uploadError);
+                    showErrorNotification('画像のアップロードに失敗しました');
+                    setUploadMessage(null);
+                }
+            }
+
+            e.target.value = '';
         } catch (error) {
             console.error('Image compression failed:', error);
             showErrorNotification('画像の圧縮に失敗しました');
@@ -119,25 +152,13 @@ function RecordContent() {
         setUploadMessage(null);
 
         try {
-            let finalImageUrl: string | undefined;
-            let finalImageData: string | undefined;
+            let finalImageUrl: string | undefined = imageUrl || undefined;
 
-            // Cloudinary が設定されている場合はアップロード
-            if (imageFile && isCloudinaryConfigured()) {
-                try {
-                    setUploadMessage('画像をアップロード中...');
-                    finalImageUrl = await uploadImageFile(imageFile, userId);
-                    setUploadMessage('画像アップロード完了');
-                    // Cloudinary にアップロード成功した場合は Base64 を保存しない
-                } catch (uploadError) {
-                    console.error('Cloudinary upload failed:', uploadError);
-                    setUploadMessage('画像アップロードに失敗しました。Base64で保存します。');
-                    // フォールバック: Base64 データを保存
-                    finalImageData = imageData || undefined;
-                }
-            } else {
-                // Cloudinary 未設定の場合は Base64 を使用
-                finalImageData = imageData || undefined;
+            // まだアップロードされていない場合のみアップロード（通常は既にアップロード済み）
+            if (!finalImageUrl && imageFile && isCloudinaryConfigured()) {
+                setUploadMessage('画像をアップロード中...');
+                finalImageUrl = await uploadImageFile(imageFile, userId);
+                setUploadMessage('画像アップロード完了');
             }
 
             // サーバーAPIでログ保存
@@ -149,7 +170,6 @@ function RecordContent() {
                     missionId: mission.id,
                     missionText: mission.text,
                     imageUrl: finalImageUrl,
-                    imageData: finalImageData,
                     location: sanitizedLocation ? { name: sanitizedLocation } : undefined,
                     memo: sanitizedMemo || undefined,
                     status: 'completed', // 完了ステータス
@@ -163,28 +183,8 @@ function RecordContent() {
                 throw new Error(data.message || '保存に失敗しました');
             }
 
-            // localStorage にもキャッシュ（オフライン対応）
-            try {
-                const log: UserLog = {
-                    id: data.logId,
-                    userId,
-                    missionText: mission.text,
-                    missionId: mission.id,
-                    imageUrl: finalImageUrl,
-                    imageData: finalImageData,
-                    location: sanitizedLocation ? { name: sanitizedLocation } : undefined,
-                    memo: sanitizedMemo || undefined,
-                    status: 'completed', // 完了ステータス
-                    isPublic: false,
-                    createdAt: new Date().toISOString(),
-                };
-                const logsString = localStorage.getItem('michikusa_memory_logs') || '[]';
-                const logs = JSON.parse(logsString);
-                logs.push(log);
-                localStorage.setItem('michikusa_memory_logs', JSON.stringify(logs));
-            } catch (storageError) {
-                console.warn('localStorage へのキャッシュに失敗しました:', storageError);
-            }
+            // キャッシュは最小限に: 画像データはCloudinaryに保存済みのためlocalStorageに保存しない
+            // 必要に応じてFirestoreから取得する方針に変更
 
             setUploadMessage('記録を保存しました');
 
@@ -219,10 +219,10 @@ function RecordContent() {
                 <div className={styles.formGroup}>
                     <label className={styles.label}>写真</label>
                     <div className={styles.imageInputContainer}>
-                        {!imageData ? (
+                        {!previewUrl ? (
                             <label htmlFor="imageInput" className={styles.imageInputLabel}>
                                 <input
-                                    key={imageData ? 'hidden' : 'visible'}  // key を追加
+                                    key={previewUrl ? 'hidden' : 'visible'}
                                     type="file"
                                     id="imageInput"
                                     accept="image/*"
@@ -236,11 +236,15 @@ function RecordContent() {
                             </label>
                         ) : (
                             <div className={styles.imagePreview}>
-                                <img src={imageData} alt="撮影した写真" className={styles.previewImage} />
+                                <img src={previewUrl} alt="撮影した写真" className={styles.previewImage} />
                                 <button
                                     onClick={() => {
-                                        setImageData(null);
                                         setImageFile(null);
+                                        setImageUrl(null);
+                                        if (previewUrl && previewUrl.startsWith('blob:')) {
+                                            URL.revokeObjectURL(previewUrl);
+                                        }
+                                        setPreviewUrl(null);
                                     }}
                                     className={styles.imageChangeButton}
                                 >
