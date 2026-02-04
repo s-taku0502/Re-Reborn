@@ -146,7 +146,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="ja">
+        <html lang="ja" suppressHydrationWarning>
             <head>
                 {/* Permissions Policy for camera access */}
                 <meta name="permissions-policy" content="camera=*, microphone=*" />
@@ -265,6 +265,14 @@ export default function RootLayout({
                     最適な体験のため、Chrome のご使用をお願いします。
                 </div>
 
+                {/* Google AdSense */}
+                <Script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8577012795231841"
+                    crossOrigin="anonymous"
+                    strategy="afterInteractive"
+                />
+                
                 {/* Google Analytics */}
                 <Script
                     strategy="afterInteractive"
