@@ -25,3 +25,6 @@ export function WalkingPersonLoader() {
         </div>
     );
 }
+
+export const theme_color = '#4CAF50';
+export const status_bar_color = '#4CAF50';

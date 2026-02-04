@@ -10,6 +10,7 @@ export const metadata: Metadata = {
         template: '%s | みちくさメモリー',
     },
     description: 'みちくさメモリーは散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
+
     
     // OG画像解決用のbaseURL設定
     metadataBase: new URL('https://michikusa-memory.vercel.app'),
@@ -135,7 +136,7 @@ export const viewport: Viewport = {
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
-    themeColor: '#4CAF50',
+    themeColor: '#1976D2',  // 空色に変更
     viewportFit: 'cover',
 };
 
