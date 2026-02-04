@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 
     // OG画像解決用のbaseURL設定
-    metadataBase: new URL('https://michikusa-memory.vercel.app'),
+    metadataBase: new URL('https://michikusa-memory.com'),
 
     formatDetection: {
         email: false,
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: 'website',
         locale: 'ja_JP',
-        url: 'https://michikusa-memory.vercel.app/',
+        url: 'https://michikusa-memory.com/',
         siteName: 'みちくさメモリー (michikusa_memory)',
         title: 'みちくさメモリー - 散歩が冒険になる',
         description: 'みちくさメモリーは、いつもの散歩をAIミッションで非日常の冒険に。運動不足・ストレス解消・新しい発見。毎日がちょっと楽しくなる無料アプリ。',
@@ -118,10 +118,10 @@ export const metadata: Metadata = {
 
     // カノニカルURL
     alternates: {
-        canonical: 'https://michikusa-memory.vercel.app/',
+        canonical: 'https://michikusa-memory.com/',
         languages: {
-            'ja': 'https://michikusa-memory.vercel.app/',
-            'x-default': 'https://michikusa-memory.vercel.app/',
+            'ja': 'https://michikusa-memory.com/',
+            'x-default': 'https://michikusa-memory.com/',
         },
     },
 
@@ -153,8 +153,8 @@ export default function RootLayout({
                 <meta name="google-adsense-account" content="ca-pub-8577012795231841" />
 
                 {/* hreflang タグ */}
-                <link rel="alternate" hrefLang="ja" href="https://michikusa-memory.vercel.app/" />
-                <link rel="alternate" hrefLang="x-default" href="https://michikusa-memory.vercel.app/" />
+                <link rel="alternate" hrefLang="ja" href="https://michikusa-memory.com/" />
+                <link rel="alternate" hrefLang="x-default" href="https://michikusa-memory.com/" />
 
                 {/* Chrome推奨通知用スタイル */}
                 <style>{`

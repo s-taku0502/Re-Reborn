@@ -1,12 +1,13 @@
 /**
  * サイトマップ生成
  * - Next.jsのMetadataRouteを利用して /sitemap.xml を自動生成
- * - 本番URLは NEXT_PUBLIC_SITE_URL または VERCEL_URL を使用
+ * - カスタムドメイン: NEXT_PUBLIC_SITE_URL=https://michikusa-memory.com
  * - 公開ページのみを列挙（認証必須ページは除外）
  * 
  * 公開ページ（検索エンジン向け）:
  * - / : ホーム（SEO最適化）
- * - /setup : 新規登録・ログイン（インデックス不要、noindex設定）
+ * - /contact : お問い合わせ
+ * - /setup : 新規登録・ログイン
  * 
  * 認証必須ページ（クローラーがアクセス不可）:
  * - /oracle : ミッション受信

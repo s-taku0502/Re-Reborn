@@ -30,6 +30,6 @@ export default function robots(): MetadataRoute.Robots {
                 crawlDelay: 1,
             },
         ],
-        sitemap: 'https://michikusa-memory.vercel.app/sitemap.xml',
+        sitemap: 'https://michikusa-memory.com/sitemap.xml',
     };
 }

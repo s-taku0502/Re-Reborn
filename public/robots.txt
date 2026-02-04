@@ -42,4 +42,4 @@ Disallow: /mypage
 Disallow: /admin
 
 # サイトマップ
-Sitemap: https://michikusa-memory.vercel.app/sitemap.xml
+Sitemap: https://michikusa-memory.com/sitemap.xml
