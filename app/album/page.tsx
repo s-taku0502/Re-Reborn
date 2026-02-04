@@ -173,7 +173,7 @@ export default function AlbumPage() {
                         )}
 
                         <div className={styles.detailMission}>
-                            <span className={styles.detailLabel}>お告げ</span>
+                            <span className={styles.detailLabel}>ミッション</span>
                             <p className={styles.detailMissionText}>{selectedLog.missionText}</p>
                         </div>
 
