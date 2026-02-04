@@ -11,16 +11,16 @@ export const metadata: Metadata = {
     },
     description: 'みちくさメモリーは散歩・ウォーキングがゲームのように楽しくなる無料PWAアプリ。AIが毎日ユニークなミッションを生成。運動不足解消、メンタルヘルスケア、新しい発見。GPS機能でいつもの道が冒険に変わる。',
 
-    
+
     // OG画像解決用のbaseURL設定
     metadataBase: new URL('https://michikusa-memory.vercel.app'),
-    
+
     formatDetection: {
         email: false,
         telephone: false,
         address: false,
     },
-    
+
     // キーワード最適化（長尾キーワード含む）
     keywords: [
         'みちくさメモリー',
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
         'フィットネス',
         '習慣化',
     ],
-    
+
     // OGP強化
     openGraph: {
         type: 'website',
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
             },
         ],
     },
-    
+
     // Twitter Card最適化
     twitter: {
         card: 'summary_large_image',
@@ -88,7 +88,7 @@ export const metadata: Metadata = {
         creator: '@michikusa_memory',
         site: '@michikusa_memory',
     },
-    
+
     // 検索エンジン向けヒント
     authors: [{ name: 'michikusa_memory' }],
     creator: 'michikusa_memory',
@@ -103,7 +103,7 @@ export const metadata: Metadata = {
             'max-snippet': -1,
         },
     },
-    
+
     // アプリ設定
     manifest: '/manifest.json',
     icons: {
@@ -115,7 +115,7 @@ export const metadata: Metadata = {
         statusBarStyle: 'default',
         title: 'みちくさメモリー',
     },
-    
+
     // カノニカルURL
     alternates: {
         canonical: 'https://michikusa-memory.vercel.app/',
@@ -124,10 +124,10 @@ export const metadata: Metadata = {
             'x-default': 'https://michikusa-memory.vercel.app/',
         },
     },
-    
+
     // カテゴリー
     category: 'health',
-    
+
     // その他のメタデータ
     referrer: 'strict-origin-when-cross-origin',
 };
@@ -153,7 +153,7 @@ export default function RootLayout({
                 {/* hreflang タグ */}
                 <link rel="alternate" hrefLang="ja" href="https://michikusa-memory.vercel.app/" />
                 <link rel="alternate" hrefLang="x-default" href="https://michikusa-memory.vercel.app/" />
-                
+
                 {/* Chrome推奨通知用スタイル */}
                 <style>{`
                   .chrome-recommendation-br {
@@ -165,7 +165,7 @@ export default function RootLayout({
                     }
                   }
                 `}</style>
-                
+
                 {/* 構造化データ (JSON-LD) - Google検索結果強化 */}
                 <script
                     type="application/ld+json"
@@ -205,6 +205,7 @@ export default function RootLayout({
                         }),
                     }}
                 />
+
                 {/* FAQ構造化データ */}
                 <script
                     type="application/ld+json"
@@ -272,14 +273,14 @@ export default function RootLayout({
                     crossOrigin="anonymous"
                     strategy="afterInteractive"
                 />
-                
+
                 {/* Google Analytics */}
                 <Script
                     strategy="afterInteractive"
                     src="https://www.googletagmanager.com/gtag/js?id=G-V51YH5JYTD"
                 />
 
-                {/* Google Analytics && google ad setting */}
+                {/* Google Analytics */}
                 <Script
                     id="google-analytics"
                     strategy="afterInteractive"
