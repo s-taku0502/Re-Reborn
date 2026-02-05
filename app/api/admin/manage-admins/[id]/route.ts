@@ -15,9 +15,11 @@ import { findAdminById, updateAdmin, deleteAdmin, recordAuditLog } from '@/lib/a
  */
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
+
         // 認証チェック
         const authHeader = req.headers.get('authorization');
         if (!authHeader) {
@@ -53,7 +55,7 @@ export async function GET(
         }
 
         // 対象管理者を取得
-        const targetAdmin = await findAdminById(params.id);
+        const targetAdmin = await findAdminById(id);
         if (!targetAdmin) {
             return NextResponse.json(
                 { success: false, error: '管理者が見つかりません' },
@@ -92,9 +94,11 @@ export async function GET(
  */
 export async function PATCH(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
+
         // 認証チェック
         const authHeader = req.headers.get('authorization');
         if (!authHeader) {
@@ -130,7 +134,7 @@ export async function PATCH(
         }
 
         // 対象管理者を取得
-        const targetAdmin = await findAdminById(params.id);
+        const targetAdmin = await findAdminById(id);
         if (!targetAdmin) {
             return NextResponse.json(
                 { success: false, error: '管理者が見つかりません' },
@@ -166,14 +170,14 @@ export async function PATCH(
         }
 
         // 更新
-        await updateAdmin(params.id, updates);
+        await updateAdmin(id, updates);
 
         // 監査ログ記録
         await recordAuditLog(
             admin.adminId,
             'update',
             'admin',
-            params.id,
+            id,
             {
                 before: {
                     displayName: targetAdmin.displayName,
@@ -205,9 +209,11 @@ export async function PATCH(
  */
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
+
         // 認証チェック
         const authHeader = req.headers.get('authorization');
         if (!authHeader) {
@@ -243,7 +249,7 @@ export async function DELETE(
         }
 
         // 自分自身は削除不可
-        if (params.id === admin.adminId) {
+        if (id === admin.adminId) {
             return NextResponse.json(
                 { success: false, error: '自分自身は削除できません' },
                 { status: 400 }
@@ -251,7 +257,7 @@ export async function DELETE(
         }
 
         // 対象管理者を取得
-        const targetAdmin = await findAdminById(params.id);
+        const targetAdmin = await findAdminById(id);
         if (!targetAdmin) {
             return NextResponse.json(
                 { success: false, error: '管理者が見つかりません' },
@@ -261,7 +267,7 @@ export async function DELETE(
 
         // 管理者を削除（最後のスーパー管理者の場合はエラーになる）
         try {
-            await deleteAdmin(params.id);
+            await deleteAdmin(id);
         } catch (error: any) {
             if (error.message === 'Cannot delete the last superadmin') {
                 return NextResponse.json(
@@ -277,7 +283,7 @@ export async function DELETE(
             admin.adminId,
             'delete',
             'admin',
-            params.id,
+            id,
             {
                 before: {
                     email: targetAdmin.email,
