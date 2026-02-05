@@ -27,6 +27,10 @@ interface MonthlyStats {
 
 type TabType = 'daily' | 'monthly';
 
+type MonthlySortKey = keyof MonthlyStats;
+type DailySortKey = keyof DailyStats;
+type SortOrder = 'asc' | 'desc';
+
 export default function StatisticsPage() {
     const { admin, isLoading: authLoading } = useAdminAuth();
     const [tab, setTab] = useState<TabType>('monthly');
@@ -35,6 +39,12 @@ export default function StatisticsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isExporting, setIsExporting] = useState(false);
+
+    // ソート状態
+    const [monthlySortKey, setMonthlySortKey] = useState<MonthlySortKey>('month');
+    const [monthlySortOrder, setMonthlySortOrder] = useState<SortOrder>('desc');
+    const [dailySortKey, setDailySortKey] = useState<DailySortKey>('date');
+    const [dailySortOrder, setDailySortOrder] = useState<SortOrder>('desc');
 
     // 統計データを取得
     useEffect(() => {
@@ -134,6 +144,79 @@ export default function StatisticsPage() {
             return `${meters}m`;
         }
         return `${(meters / 1000).toFixed(1)}km`;
+    };
+
+    // ソート関数
+    const handleMonthlySort = (key: MonthlySortKey) => {
+        if (monthlySortKey === key) {
+            // 同じキーをクリックした場合は順序を反転
+            setMonthlySortOrder(monthlySortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            // 新しいキーの場合は降順でスタート
+            setMonthlySortKey(key);
+            setMonthlySortOrder('desc');
+        }
+    };
+
+    const handleDailySort = (key: DailySortKey) => {
+        if (dailySortKey === key) {
+            setDailySortOrder(dailySortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setDailySortKey(key);
+            setDailySortOrder('desc');
+        }
+    };
+
+    // ソートされたデータを取得
+    const sortedMonthlyStats = [...monthlyStats].sort((a, b) => {
+        const aValue = a[monthlySortKey];
+        const bValue = b[monthlySortKey];
+        
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+            return monthlySortOrder === 'asc' 
+                ? aValue.localeCompare(bValue)
+                : bValue.localeCompare(aValue);
+        }
+        
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            return monthlySortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+        }
+        
+        return 0;
+    });
+
+    const sortedDailyStats = [...dailyStats].sort((a, b) => {
+        const aValue = a[dailySortKey];
+        const bValue = b[dailySortKey];
+        
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+            return dailySortOrder === 'asc'
+                ? aValue.localeCompare(bValue)
+                : bValue.localeCompare(aValue);
+        }
+        
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            return dailySortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+        }
+        
+        return 0;
+    });
+
+    // ソートインジケーター
+    const getSortIcon = (key: MonthlySortKey | DailySortKey, currentKey: MonthlySortKey | DailySortKey, currentOrder: SortOrder) => {
+        if (key !== currentKey) return ' ⇅';
+        return currentOrder === 'asc' ? ' ↑' : ' ↓';
+    };
+
+    // ソートリセット関数
+    const handleMonthlyReset = () => {
+        setMonthlySortKey('month');
+        setMonthlySortOrder('desc');
+    };
+
+    const handleDailyReset = () => {
+        setDailySortKey('date');
+        setDailySortOrder('desc');
     };
 
     if (authLoading || isLoading) {
@@ -267,7 +350,16 @@ export default function StatisticsPage() {
 
                         {/* 月次テーブル */}
                         <div className={styles.content}>
-                            <h2 className={styles.contentTitle}>📅 月別統計詳細</h2>
+                            <div className={styles.contentHeader}>
+                                <h2 className={styles.contentTitle}>📅 月別統計詳細</h2>
+                                <button 
+                                    className={styles.resetButton}
+                                    onClick={handleMonthlyReset}
+                                    disabled={monthlySortKey === 'month' && monthlySortOrder === 'desc'}
+                                >
+                                    🔄 リセット
+                                </button>
+                            </div>
                             {monthlyStats.length === 0 ? (
                                 <div className={styles.emptyState}>
                                     <p>データがありません</p>
@@ -276,18 +368,34 @@ export default function StatisticsPage() {
                                 <table className={styles.table}>
                                     <thead>
                                         <tr>
-                                            <th>月</th>
-                                            <th>新規ユーザー</th>
-                                            <th>アクティブ</th>
-                                            <th>散歩記録</th>
-                                            <th>総距離</th>
-                                            <th>平均距離</th>
-                                            <th>お問い合わせ</th>
-                                            <th>解決済み</th>
+                                            <th onClick={() => handleMonthlySort('month')} className={styles.sortableHeader}>
+                                                月{getSortIcon('month', monthlySortKey, monthlySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleMonthlySort('newUsers')} className={styles.sortableHeader}>
+                                                新規ユーザー{getSortIcon('newUsers', monthlySortKey, monthlySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleMonthlySort('activeUsers')} className={styles.sortableHeader}>
+                                                アクティブ{getSortIcon('activeUsers', monthlySortKey, monthlySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleMonthlySort('totalWalkingLogs')} className={styles.sortableHeader}>
+                                                散歩記録{getSortIcon('totalWalkingLogs', monthlySortKey, monthlySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleMonthlySort('totalDistanceWalked')} className={styles.sortableHeader}>
+                                                総距離{getSortIcon('totalDistanceWalked', monthlySortKey, monthlySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleMonthlySort('averageWalkDistance')} className={styles.sortableHeader}>
+                                                平均距離{getSortIcon('averageWalkDistance', monthlySortKey, monthlySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleMonthlySort('newContacts')} className={styles.sortableHeader}>
+                                                お問い合わせ{getSortIcon('newContacts', monthlySortKey, monthlySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleMonthlySort('contactsResolved')} className={styles.sortableHeader}>
+                                                解決済み{getSortIcon('contactsResolved', monthlySortKey, monthlySortOrder)}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {monthlyStats.map((stat) => (
+                                        {sortedMonthlyStats.map((stat) => (
                                             <tr key={stat.month}>
                                                 <td>{stat.month}</td>
                                                 <td>{formatNumber(stat.newUsers)}</td>
@@ -367,7 +475,16 @@ export default function StatisticsPage() {
 
                         {/* 日次テーブル */}
                         <div className={styles.content}>
-                            <h2 className={styles.contentTitle}>📆 日別統計詳細</h2>
+                            <div className={styles.contentHeader}>
+                                <h2 className={styles.contentTitle}>📆 日別統計詳細</h2>
+                                <button 
+                                    className={styles.resetButton}
+                                    onClick={handleDailyReset}
+                                    disabled={dailySortKey === 'date' && dailySortOrder === 'desc'}
+                                >
+                                    🔄 リセット
+                                </button>
+                            </div>
                             {dailyStats.length === 0 ? (
                                 <div className={styles.emptyState}>
                                     <p>データがありません</p>
@@ -376,16 +493,28 @@ export default function StatisticsPage() {
                                 <table className={styles.table}>
                                     <thead>
                                         <tr>
-                                            <th>日付</th>
-                                            <th>新規ユーザー</th>
-                                            <th>散歩記録</th>
-                                            <th>総距離</th>
-                                            <th>お問い合わせ</th>
-                                            <th>解決済み</th>
+                                            <th onClick={() => handleDailySort('date')} className={styles.sortableHeader}>
+                                                日付{getSortIcon('date', dailySortKey, dailySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleDailySort('newUsers')} className={styles.sortableHeader}>
+                                                新規ユーザー{getSortIcon('newUsers', dailySortKey, dailySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleDailySort('newWalkingLogs')} className={styles.sortableHeader}>
+                                                散歩記録{getSortIcon('newWalkingLogs', dailySortKey, dailySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleDailySort('totalDistanceWalked')} className={styles.sortableHeader}>
+                                                総距離{getSortIcon('totalDistanceWalked', dailySortKey, dailySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleDailySort('newContacts')} className={styles.sortableHeader}>
+                                                お問い合わせ{getSortIcon('newContacts', dailySortKey, dailySortOrder)}
+                                            </th>
+                                            <th onClick={() => handleDailySort('contactsResolved')} className={styles.sortableHeader}>
+                                                解決済み{getSortIcon('contactsResolved', dailySortKey, dailySortOrder)}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {dailyStats.map((stat) => (
+                                        {sortedDailyStats.map((stat) => (
                                             <tr key={stat.date}>
                                                 <td>{stat.date}</td>
                                                 <td>{formatNumber(stat.newUsers)}</td>
