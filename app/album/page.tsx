@@ -6,6 +6,7 @@ import { UserLog } from '@/lib/types';
 import { getLogsFromFirestore, deleteLogFromFirestore } from '@/lib/firestore';
 import { getErrorMessage, showErrorNotification, showSuccessNotification, showConfirmModal } from '@/lib/errorHandler';
 import { getThumbnailUrl, getMediumUrl, isAllowedImageUrl } from '@/lib/cloudinary';
+import { ensureAuthenticated } from '@/lib/firebase';
 import styles from './album.module.css';
 
 export default function AlbumPage() {
@@ -24,10 +25,13 @@ export default function AlbumPage() {
         }
         setUserId(storedUserId);
 
-        // Firestore からログ取得（SSOT）
+        // Firebase匿名認証を確保してからFirestore取得
         const fetchLogs = async () => {
             setIsLoading(true);
             try {
+                // 認証を確保
+                await ensureAuthenticated();
+
                 const firestoreLogs = await getLogsFromFirestore(storedUserId);
 
                 // 新しい順にソート

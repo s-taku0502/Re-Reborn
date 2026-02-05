@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { validateUserId, validatePassword } from '@/lib/validation';
 import { savePasswordHash } from '@/lib/password';
+import { ensureAuthenticated } from '@/lib/firebase';
 import styles from './setup.module.css';
 
 export default function SetupPage() {
@@ -18,6 +19,13 @@ export default function SetupPage() {
     const LOGIN_ATTEMPT_KEY = 'michikusa_memory_login_attempt';
     const MAX_LOGIN_ATTEMPTS = 5;
     const LOCK_MINUTES = 15;
+
+    // Firebase匿名認証を確保
+    useEffect(() => {
+        ensureAuthenticated().catch((error) => {
+            console.error('認証エラー:', error);
+        });
+    }, []);
 
     const getLoginAttempt = () => {
         try {
