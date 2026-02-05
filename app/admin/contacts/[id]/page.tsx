@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import styles from './detail.module.css';
 import { useAdminAuth, ProtectedAdminRoute } from '@/lib/admin-auth-context';
 import { getTokenFromStorage } from '@/lib/admin-jwt';
@@ -23,20 +23,56 @@ interface Contact {
     assignedTo: string | null;
 }
 
-export default function ContactDetailPage({ params }: { params: { id: string } }) {
+const statusLabels: Record<Contact['status'], string> = {
+    new: '未読',
+    read: '既読',
+    inProgress: '対応中',
+    resolved: '解決済み',
+    closed: 'クローズ',
+};
+
+const statusClassMap: Record<Contact['status'], string> = {
+    new: styles.statusNew,
+    read: styles.statusRead,
+    inProgress: styles.statusInProgress,
+    resolved: styles.statusResolved,
+    closed: styles.statusClosed,
+};
+
+export default function ContactDetailPage() {
     const router = useRouter();
     const { admin, isLoading: authLoading } = useAdminAuth();
+    const params = useParams() as { id: string };
     const [contact, setContact] = useState<Contact | null>(null);
+    const [status, setStatus] = useState<Contact['status']>('new');
+    const [adminNote, setAdminNote] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-    // 編集用の状態
-    const [status, setStatus] = useState<string>('new');
-    const [adminNote, setAdminNote] = useState<string>('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
-    // お問い合わせ詳細を取得
+    const canDelete = admin?.role === 'superadmin';
+
+    const formattedDates = useMemo(() => {
+        if (!contact) {
+            return {
+                createdAt: '- ',
+                updatedAt: '- ',
+                readAt: '- ',
+            };
+        }
+
+        const format = (value: string | null) =>
+            value ? new Date(value).toLocaleString('ja-JP') : '-';
+
+        return {
+            createdAt: format(contact.createdAt),
+            updatedAt: format(contact.updatedAt),
+            readAt: format(contact.readAt),
+        };
+    }, [contact]);
+
     useEffect(() => {
         if (authLoading || !admin) return;
 
@@ -44,6 +80,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
             try {
                 setIsLoading(true);
                 setError(null);
+                setSuccess(null);
 
                 const token = getTokenFromStorage();
                 if (!token) {
@@ -58,20 +95,15 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
                 });
 
                 if (!response.ok) {
-                    if (response.status === 404) {
-                        setError('お問い合わせが見つかりません');
-                    } else {
-                        setError('お問い合わせの取得に失敗しました');
-                    }
-                    return;
+                    throw new Error('お問い合わせの取得に失敗しました');
                 }
 
                 const data = await response.json();
                 setContact(data.contact);
                 setStatus(data.contact.status);
-                setAdminNote(data.contact.adminNote || '');
-            } catch (err) {
-                console.error('[Contact Detail] Error fetching contact:', err);
+                setAdminNote(data.contact.adminNote ?? '');
+            } catch (fetchError) {
+                console.error('[Admin Contact Detail] Error:', fetchError);
                 setError('お問い合わせの取得中にエラーが発生しました');
             } finally {
                 setIsLoading(false);
@@ -79,7 +111,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
         };
 
         fetchContact();
-    }, [params.id, admin, authLoading]);
+    }, [admin, authLoading, params.id]);
 
     const handleSave = async () => {
         if (!contact) return;
@@ -87,7 +119,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
         try {
             setIsSaving(true);
             setError(null);
-            setSuccessMessage(null);
+            setSuccess(null);
 
             const token = getTokenFromStorage();
             if (!token) {
@@ -108,39 +140,35 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
             });
 
             if (!response.ok) {
-                throw new Error('更新に失敗しました');
+                throw new Error('お問い合わせの更新に失敗しました');
             }
 
-            setSuccessMessage('保存しました');
-
-            // 最新情報を再取得
-            const updatedResponse = await fetch(`/api/admin/contacts/${params.id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const updatedAt = new Date().toISOString();
+            setContact({
+                ...contact,
+                status,
+                adminNote: adminNote || null,
+                updatedAt,
             });
-
-            if (updatedResponse.ok) {
-                const data = await updatedResponse.json();
-                setContact(data.contact);
-            }
-        } catch (err) {
-            console.error('[Contact Detail] Error saving:', err);
-            setError('保存中にエラーが発生しました');
+            setSuccess('更新しました');
+        } catch (saveError) {
+            console.error('[Admin Contact Detail] Error:', saveError);
+            setError('更新に失敗しました');
         } finally {
             setIsSaving(false);
         }
     };
 
     const handleDelete = async () => {
-        if (!contact) return;
+        if (!contact || !canDelete) return;
 
-        if (!confirm('このお問い合わせを削除してもよろしいですか？')) {
-            return;
-        }
+        const confirmed = window.confirm('このお問い合わせを削除しますか？');
+        if (!confirmed) return;
 
         try {
+            setIsDeleting(true);
             setError(null);
+            setSuccess(null);
 
             const token = getTokenFromStorage();
             if (!token) {
@@ -156,43 +184,16 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
             });
 
             if (!response.ok) {
-                throw new Error('削除に失敗しました');
+                throw new Error('お問い合わせの削除に失敗しました');
             }
 
-            alert('削除しました');
             router.push('/admin/contacts');
-        } catch (err) {
-            console.error('[Contact Detail] Error deleting:', err);
-            setError('削除中にエラーが発生しました');
+        } catch (deleteError) {
+            console.error('[Admin Contact Detail] Error:', deleteError);
+            setError('削除に失敗しました');
+        } finally {
+            setIsDeleting(false);
         }
-    };
-
-    const getStatusLabel = (status: string) => {
-        switch (status) {
-            case 'new':
-                return '新規';
-            case 'read':
-                return '既読';
-            case 'inProgress':
-                return '対応中';
-            case 'resolved':
-                return '解決済み';
-            case 'closed':
-                return '完了';
-            default:
-                return status;
-        }
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleString('ja-JP', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
     };
 
     if (authLoading || isLoading) {
@@ -203,21 +204,12 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
         );
     }
 
-    if (error && !contact) {
-        return (
-            <ProtectedAdminRoute>
-                <div className={styles.detailContainer}>
-                    <div className={styles.errorMessage}>{error}</div>
-                    <Link href="/admin/contacts" className={styles.backButton}>
-                        ← 一覧に戻る
-                    </Link>
-                </div>
-            </ProtectedAdminRoute>
-        );
-    }
-
     if (!contact) {
-        return null;
+        return (
+            <div className={styles.detailContainer}>
+                <div className={styles.errorMessage}>お問い合わせが見つかりません</div>
+            </div>
+        );
     }
 
     return (
@@ -225,35 +217,60 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
             <div className={styles.detailContainer}>
                 <div className={styles.header}>
                     <div className={styles.headerTop}>
-                        <h1 className={styles.title}>💬 お問い合わせ詳細</h1>
+                        <h1 className={styles.title}>お問い合わせ詳細</h1>
                         <Link href="/admin/contacts" className={styles.backButton}>
-                            ← 一覧に戻る
+                            一覧に戻る
                         </Link>
                     </div>
+                    <span className={`${styles.statusBadge} ${statusClassMap[contact.status]}`}>
+                        {statusLabels[contact.status]}
+                    </span>
                 </div>
 
                 {error && <div className={styles.errorMessage}>{error}</div>}
-                {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
+                {success && <div className={styles.successMessage}>{success}</div>}
 
                 <div className={styles.contentGrid}>
                     <div className={styles.mainContent}>
-                        <div className={styles.section}>
-                            <h2 className={styles.sectionTitle}>📄 お問い合わせ内容</h2>
-                            <div className={styles.infoRow}>
-                                <span className={styles.infoLabel}>件名</span>
-                                <span className={styles.infoValue}>{contact.subject}</span>
-                            </div>
-                            <div style={{ marginTop: '1.5rem' }}>
-                                <p className={styles.messageContent}>{contact.message}</p>
-                            </div>
-                        </div>
+                        <h2 className={styles.sectionTitle}>{contact.subject}</h2>
+                        <div className={styles.messageContent}>{contact.message}</div>
                     </div>
 
                     <div className={styles.sidebar}>
                         <div className={styles.section}>
-                            <h3 className={styles.sectionTitle}>👤 送信者情報</h3>
+                            <h3 className={styles.sectionTitle}>対応状況</h3>
+                            <select
+                                className={styles.statusSelect}
+                                value={status}
+                                onChange={(event) => setStatus(event.target.value as Contact['status'])}
+                            >
+                                {Object.entries(statusLabels).map(([value, label]) => (
+                                    <option key={value} value={value}>
+                                        {label}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <textarea
+                                className={styles.noteTextarea}
+                                value={adminNote}
+                                onChange={(event) => setAdminNote(event.target.value)}
+                                placeholder="対応メモを入力..."
+                            />
+
+                            <button
+                                className={styles.saveButton}
+                                onClick={handleSave}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? '保存中...' : '更新する'}
+                            </button>
+                        </div>
+
+                        <div className={styles.section}>
+                            <h3 className={styles.sectionTitle}>お問い合わせ情報</h3>
                             <div className={styles.infoRow}>
-                                <span className={styles.infoLabel}>名前</span>
+                                <span className={styles.infoLabel}>お名前</span>
                                 <span className={styles.infoValue}>{contact.name}</span>
                             </div>
                             <div className={styles.infoRow}>
@@ -261,54 +278,36 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
                                 <span className={styles.infoValue}>{contact.email}</span>
                             </div>
                             <div className={styles.infoRow}>
-                                <span className={styles.infoLabel}>送信日時</span>
-                                <span className={styles.infoValue}>{formatDate(contact.createdAt)}</span>
+                                <span className={styles.infoLabel}>受信日時</span>
+                                <span className={styles.infoValue}>{formattedDates.createdAt}</span>
                             </div>
-                            {contact.updatedAt && (
-                                <div className={styles.infoRow}>
-                                    <span className={styles.infoLabel}>更新日時</span>
-                                    <span className={styles.infoValue}>{formatDate(contact.updatedAt)}</span>
-                                </div>
-                            )}
+                            <div className={styles.infoRow}>
+                                <span className={styles.infoLabel}>更新日時</span>
+                                <span className={styles.infoValue}>{formattedDates.updatedAt}</span>
+                            </div>
+                            <div className={styles.infoRow}>
+                                <span className={styles.infoLabel}>既読日時</span>
+                                <span className={styles.infoValue}>{formattedDates.readAt}</span>
+                            </div>
+                            <div className={styles.infoRow}>
+                                <span className={styles.infoLabel}>IP</span>
+                                <span className={styles.infoValue}>{contact.ip || '-'}</span>
+                            </div>
+                            <div className={styles.infoRow}>
+                                <span className={styles.infoLabel}>User-Agent</span>
+                                <span className={styles.infoValue}>{contact.userAgent || '-'}</span>
+                            </div>
                         </div>
 
-                        <div className={styles.section}>
-                            <h3 className={styles.sectionTitle}>⚙️ ステータス管理</h3>
-                            <select
-                                className={styles.statusSelect}
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                            >
-                                <option value="new">新規</option>
-                                <option value="read">既読</option>
-                                <option value="inProgress">対応中</option>
-                                <option value="resolved">解決済み</option>
-                                <option value="closed">完了</option>
-                            </select>
-                        </div>
-
-                        <div className={styles.section}>
-                            <h3 className={styles.sectionTitle}>📝 管理者メモ</h3>
-                            <textarea
-                                className={styles.noteTextarea}
-                                placeholder="内部メモを入力..."
-                                value={adminNote}
-                                onChange={(e) => setAdminNote(e.target.value)}
-                            />
-                            <button
-                                className={styles.saveButton}
-                                onClick={handleSave}
-                                disabled={isSaving}
-                            >
-                                {isSaving ? '保存中...' : '保存'}
-                            </button>
-                        </div>
-
-                        {admin?.role === 'superadmin' && (
+                        {canDelete && (
                             <div className={styles.section}>
-                                <h3 className={styles.sectionTitle}>🗑️ 削除</h3>
-                                <button className={styles.deleteButton} onClick={handleDelete}>
-                                    お問い合わせを削除
+                                <h3 className={styles.sectionTitle}>削除</h3>
+                                <button
+                                    className={styles.deleteButton}
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? '削除中...' : 'お問い合わせを削除'}
                                 </button>
                             </div>
                         )}

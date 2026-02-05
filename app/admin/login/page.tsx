@@ -3,7 +3,8 @@
 import { FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './login.module.css';
-import { saveTokenToStorage } from '@/lib/admin-jwt';
+import { saveTokenToStorage, decodeToken } from '@/lib/admin-jwt';
+import { useAdminAuth } from '@/lib/admin-auth-context';
 
 interface LoginResponse {
     success: boolean;
@@ -18,6 +19,7 @@ interface LoginResponse {
 
 export default function AdminLoginPage() {
     const router = useRouter();
+    const { setAdminAuth, isLoading: authLoading } = useAdminAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -51,13 +53,17 @@ export default function AdminLoginPage() {
             // バリデーション
             if (!email || !password) {
                 setError('メールアドレスとパスワードを入力してください');
+                setIsLoading(false);
                 return;
             }
 
             if (!/^\d{7}$/.test(password)) {
                 setError('パスワードは7桁の数字である必要があります');
+                setIsLoading(false);
                 return;
             }
+
+            console.log('[Admin Login] Attempting login for:', email);
 
             // ログインリクエストを送信
             const response = await fetch('/api/admin/auth/login', {
@@ -86,22 +92,49 @@ export default function AdminLoginPage() {
                         'ログイン試行回数が多すぎます。15分後に再度お試しください。'
                     );
                 } else {
+                    console.error('[Admin Login] Login failed:', data.error);
                     setError(data.error || 'ログインに失敗しました');
                 }
+                setIsLoading(false);
                 return;
             }
 
             // ログイン成功
-            if (data.token) {
-                saveTokenToStorage(data.token);
+            if (!data.token) {
+                console.error('[Admin Login] No token in response');
+                setError('トークンの取得に失敗しました');
+                setIsLoading(false);
+                return;
             }
 
-            // ダッシュボードへリダイレクト
-            router.push('/admin');
+            console.log('[Admin Login] Login successful, saving token');
+            
+            // 1. トークンを localStorage に保存
+            saveTokenToStorage(data.token);
+
+            // 2. トークンを検証して payload を取得
+            const payload = decodeToken(data.token);
+            if (!payload) {
+                console.error('[Admin Login] Token verification failed');
+                setError('トークンの検証に失敗しました');
+                setIsLoading(false);
+                return;
+            }
+
+            console.log('[Admin Login] Token verified, setting auth state');
+
+            // 3. 認証状態を更新
+            setAdminAuth(payload);
+
+            console.log('[Admin Login] Auth state set, redirecting to dashboard');
+
+            // 4. ダッシュボードへリダイレクト（次のレンダリングサイクルで実行）
+            setTimeout(() => {
+                router.push('/admin');
+            }, 0);
         } catch (err) {
             console.error('[Admin Login] Error:', err);
             setError('ネットワークエラーが発生しました。もう一度お試しください。');
-        } finally {
             setIsLoading(false);
         }
     };

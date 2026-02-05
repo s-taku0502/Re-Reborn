@@ -86,9 +86,6 @@
     background: #555;
 }
 
-.submitButton:active:not(:disabled) {
-    
-}
 
 .submitButton:disabled {
     opacity: 0.7;

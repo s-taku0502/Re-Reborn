@@ -6,13 +6,14 @@ import {
     useState,
     useEffect,
     ReactNode,
+    useRef,
 } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
     getTokenFromStorage,
     removeTokenFromStorage,
     isTokenExpired,
-    verifyToken,
+    decodeToken,
     AdminJWTPayload,
 } from '@/lib/admin-jwt';
 
@@ -22,6 +23,7 @@ interface AdminAuthContextType {
     isAuthenticated: boolean;
     logout: () => void;
     refreshAuth: () => Promise<void>;
+    setAdminAuth: (payload: AdminJWTPayload) => void;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
@@ -36,55 +38,88 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     const pathname = usePathname();
     const [admin, setAdmin] = useState<AdminJWTPayload | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const hasInitialized = useRef(false);
 
-    // 初期化：トークンを検証
+    // 初期化：トークンを検証（マウント時に1回だけ）
     useEffect(() => {
+        if (hasInitialized.current) return;
+        hasInitialized.current = true;
+
         const initializeAuth = async () => {
-            const token = getTokenFromStorage();
+            try {
+                const token = getTokenFromStorage();
 
-            if (!token) {
-                setIsLoading(false);
-                return;
-            }
+                if (!token) {
+                    console.log('[AdminAuthProvider] No token found in storage');
+                    setIsLoading(false);
+                    return;
+                }
 
-            // トークンが期限切れか確認
-            if (isTokenExpired(token)) {
+                console.log('[AdminAuthProvider] Token found, validating...');
+
+                // トークンが期限切れか確認
+                if (isTokenExpired(token)) {
+                    console.warn('[AdminAuthProvider] Token expired');
+                    removeTokenFromStorage();
+                    setIsLoading(false);
+                    return;
+                }
+
+                // トークンをデコード
+                const payload = decodeToken(token);
+                if (payload) {
+                    console.log('[AdminAuthProvider] Token valid, setting admin:', payload.email);
+                    setAdmin(payload);
+                } else {
+                    console.error('[AdminAuthProvider] Token verification failed');
+                    removeTokenFromStorage();
+                }
+            } catch (error) {
+                console.error('[AdminAuthProvider] Initialize auth error:', error);
                 removeTokenFromStorage();
+            } finally {
                 setIsLoading(false);
-                return;
             }
-
-            // トークンをデコード
-            const payload = verifyToken(token);
-            if (payload) {
-                setAdmin(payload);
-            } else {
-                removeTokenFromStorage();
-            }
-
-            setIsLoading(false);
         };
 
         initializeAuth();
     }, []);
 
-    // 認証状態に基づいてリダイレクト
+    // 認証状態に基づいてリダイレクト（pathname 変更時ごとに確認）
     useEffect(() => {
-        if (isLoading) return;
+        if (isLoading) {
+            console.log('[AdminAuthProvider] Still loading, skipping redirect check');
+            return;
+        }
 
         const isLoginPage = pathname === '/admin/login';
         const isAdminPage = pathname?.startsWith('/admin');
 
+        console.log('[AdminAuthProvider] Redirect check:', {
+            pathname,
+            isLoginPage,
+            isAdminPage,
+            hasAdmin: !!admin,
+        });
+
         if (isAdminPage && !isLoginPage && !admin) {
             // 保護されたページ → ログインページへリダイレクト
+            console.log('[AdminAuthProvider] Protected page without auth, redirecting to login');
             router.push('/admin/login');
         } else if (isLoginPage && admin) {
             // ログインページ → ダッシュボードへリダイレクト
+            console.log('[AdminAuthProvider] Already authenticated, redirecting to dashboard');
             router.push('/admin');
         }
     }, [admin, isLoading, pathname, router]);
 
+    const setAdminAuth = (payload: AdminJWTPayload) => {
+        console.log('[AdminAuthProvider] Setting admin auth:', payload.email);
+        setAdmin(payload);
+    };
+
     const logout = () => {
+        console.log('[AdminAuthProvider] Logging out');
         removeTokenFromStorage();
         setAdmin(null);
         router.push('/admin/login');
@@ -93,11 +128,13 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     const refreshAuth = async () => {
         const token = getTokenFromStorage();
         if (!token) {
+            console.log('[AdminAuthProvider] No token found in refreshAuth');
             setAdmin(null);
             return;
         }
 
         try {
+            console.log('[AdminAuthProvider] Refreshing auth');
             const response = await fetch('/api/admin/auth/verify', {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -105,14 +142,20 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
             });
 
             if (!response.ok) {
+                console.warn('[AdminAuthProvider] Token verification failed in refreshAuth');
                 removeTokenFromStorage();
                 setAdmin(null);
                 return;
             }
 
-            const payload = verifyToken(token);
+            const payload = decodeToken(token);
             if (payload) {
+                console.log('[AdminAuthProvider] Token refreshed successfully');
                 setAdmin(payload);
+            } else {
+                console.error('[AdminAuthProvider] Token verification failed');
+                removeTokenFromStorage();
+                setAdmin(null);
             }
         } catch (error) {
             console.error('[AdminAuthProvider] Error refreshing auth:', error);
@@ -129,6 +172,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
                 isAuthenticated: !!admin,
                 logout,
                 refreshAuth,
+                setAdminAuth,
             }}
         >
             {children}

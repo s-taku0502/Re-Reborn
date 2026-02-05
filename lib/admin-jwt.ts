@@ -48,6 +48,24 @@ export function verifyToken(token: string): AdminJWTPayload | null {
 }
 
 /**
+ * JWT トークンをデコード（署名検証なし）
+ * @param token - JWT トークン
+ * @returns デコード済みペイロード、またはエラーの場合は null
+ */
+export function decodeToken(token: string): AdminJWTPayload | null {
+  try {
+    const decoded = jwt.decode(token);
+    if (!decoded || typeof decoded !== 'object') {
+      return null;
+    }
+    return decoded as AdminJWTPayload;
+  } catch (error) {
+    console.error('[JWT] Token decode failed:', error);
+    return null;
+  }
+}
+
+/**
  * Authorization ヘッダーからトークンを抽出
  * @param authHeader - Authorization ヘッダー値
  * @returns トークン、またはない場合は null
@@ -95,7 +113,7 @@ export function removeTokenFromStorage(): void {
  * @returns 有効期限（ミリ秒）、またはエラーの場合は null
  */
 export function getTokenExpiry(token: string): number | null {
-  const payload = verifyToken(token);
+  const payload = typeof window === 'undefined' ? verifyToken(token) : decodeToken(token);
   if (!payload || !payload.exp) return null;
   return payload.exp * 1000; // 秒をミリ秒に変換
 }

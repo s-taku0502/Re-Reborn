@@ -14,7 +14,7 @@ import {
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // 認証チェック
@@ -53,8 +53,10 @@ export async function GET(
             );
         }
 
+        const { id } = await params;
+
         // お問い合わせを取得
-        const contact = await getContactById(params.id);
+        const contact = await getContactById(id);
         if (!contact) {
             return NextResponse.json(
                 { success: false, error: 'Contact not found' },
@@ -64,7 +66,7 @@ export async function GET(
 
         // 'new' ステータスの場合、自動的に 'read' に変更
         if (contact.status === 'new') {
-            await markContactAsRead(params.id);
+            await markContactAsRead(id);
             contact.status = 'read';
             contact.readAt = new Date() as any;
         }
@@ -108,7 +110,7 @@ export async function GET(
  */
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // 認証チェック
@@ -151,8 +153,10 @@ export async function PATCH(
         const body = await request.json();
         const { status, adminNote, assignedTo } = body;
 
+        const { id } = await params;
+
         // お問い合わせが存在するか確認
-        const contact = await getContactById(params.id);
+        const contact = await getContactById(id);
         if (!contact) {
             return NextResponse.json(
                 { success: false, error: 'Contact not found' },
@@ -190,7 +194,7 @@ export async function PATCH(
         }
 
         // 更新を実行
-        await updateContact(params.id, updateData);
+        await updateContact(id, updateData);
 
         // 監査ログに記録
         const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
@@ -200,7 +204,7 @@ export async function PATCH(
             admin.adminId,
             'update_contact',
             'contact',
-            params.id,
+            id,
             {
                 before,
                 after: updateData,
@@ -210,7 +214,7 @@ export async function PATCH(
         );
 
         console.info(
-            `[Admin Contact Update] ${admin.adminId} updated contact ${params.id}`
+            `[Admin Contact Update] ${admin.adminId} updated contact ${id}`
         );
 
         return NextResponse.json(
@@ -235,7 +239,7 @@ export async function PATCH(
  */
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // 認証チェック
@@ -274,8 +278,10 @@ export async function DELETE(
             );
         }
 
+        const { id } = await params;
+
         // お問い合わせが存在するか確認
-        const contact = await getContactById(params.id);
+        const contact = await getContactById(id);
         if (!contact) {
             return NextResponse.json(
                 { success: false, error: 'Contact not found' },
@@ -284,7 +290,7 @@ export async function DELETE(
         }
 
         // 削除を実行
-        await deleteContact(params.id);
+        await deleteContact(id);
 
         // 監査ログに記録
         const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
@@ -294,7 +300,7 @@ export async function DELETE(
             admin.adminId,
             'delete_contact',
             'contact',
-            params.id,
+            id,
             {
                 before: contact,
                 after: null,
@@ -304,7 +310,7 @@ export async function DELETE(
         );
 
         console.info(
-            `[Admin Contact Delete] ${admin.adminId} deleted contact ${params.id}`
+            `[Admin Contact Delete] ${admin.adminId} deleted contact ${id}`
         );
 
         return NextResponse.json(
