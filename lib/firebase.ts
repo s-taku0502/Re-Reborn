@@ -44,7 +44,7 @@ export { app, db, auth };
  */
 export async function ensureAuthenticated(): Promise<void> {
     if (typeof window === 'undefined') return;
-    
+
     const currentUser = auth?.currentUser;
     if (currentUser) return;
 

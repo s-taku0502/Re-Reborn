@@ -122,8 +122,19 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('[Admin Login] Error:', error);
+
+    const isDev = process.env.NODE_ENV !== 'production';
+    const detail =
+      error instanceof Error
+        ? { message: error.message, stack: error.stack }
+        : { message: String(error) };
+
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      {
+        success: false,
+        error: 'Internal server error',
+        ...(isDev ? { detail } : {}),
+      },
       { status: 500 }
     );
   }
