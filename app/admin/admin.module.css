@@ -1,13 +1,13 @@
 .dashboard {
     min-height: 100vh;
-    background-color: #f9fafb;
+    background-color: #fafafa;
 }
 
 .dashboardHeader {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background-color: #fafafa;
+    color: #333;
     padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .headerTop {
@@ -33,24 +33,26 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.2);
+    background: #f0f0f0;
     padding: 0.5rem 1rem;
     border-radius: 6px;
     font-size: 0.875rem;
+    color: #333;
 }
 
 .roleBadge {
-    background: rgba(255, 255, 255, 0.3);
+    background: #e5e7eb;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 600;
+    color: #333;
 }
 
 .logoutButton {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #d1d5db;
     padding: 0.5rem 1rem;
     border-radius: 6px;
     cursor: pointer;
@@ -59,7 +61,7 @@
 }
 
 .logoutButton:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #e5e7eb;
 }
 
 .headerStats {
@@ -69,16 +71,17 @@
 }
 
 .statCard {
-    background: rgba(255, 255, 255, 0.1);
+    background: white;
     padding: 1rem;
     border-radius: 8px;
-    backdrop-filter: blur(10px);
+    border: 1px solid #e5e7eb;
+    color: #333;
 }
 
 .statLabel {
     font-size: 0.75rem;
-    opacity: 0.9;
-    text-transform: uppercase;
+    color: #9ca3af;
+    text-
     letter-spacing: 0.5px;
     margin-bottom: 0.25rem;
 }
@@ -86,6 +89,7 @@
 .statValue {
     font-size: 1.75rem;
     font-weight: 700;
+    color: #333;
 }
 
 .dashboardContent {
@@ -103,7 +107,7 @@
     background: white;
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    
 }
 
 .sectionTitle {
@@ -122,13 +126,14 @@
 }
 
 .moduleCard {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: white;
+    color: #333;
     padding: 1.5rem;
     border-radius: 8px;
+    border: 1px solid #e5e7eb;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
     text-decoration: none;
     display: flex;
     flex-direction: column;
@@ -137,8 +142,8 @@
 }
 
 .moduleCard:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    background: #f9fafb;
+    border-color: #d1d5db;
 }
 
 .moduleIcon {
@@ -215,14 +220,14 @@
     width: 2rem;
     height: 2rem;
     border: 3px solid #e5e7eb;
-    border-top-color: #667eea;
+    border-top-color: #333;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
     to {
-        transform: rotate(360deg);
+        
     }
 }
 

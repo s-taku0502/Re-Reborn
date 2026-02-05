@@ -3,14 +3,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #fafafa;
     padding: 1rem;
 }
 
 .loginCard {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #e5e7eb;
     padding: 2.5rem;
     width: 100%;
     max-width: 400px;
@@ -58,8 +58,8 @@
 
 .formInput:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #333;
+    background-color: #f9fafb;
 }
 
 .formInput:disabled {
@@ -71,24 +71,23 @@
 .submitButton {
     width: 100%;
     padding: 0.75rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #333;
     color: white;
     border: none;
     border-radius: 6px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: background-color 0.2s;
     margin-top: 1rem;
 }
 
 .submitButton:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    background: #555;
 }
 
 .submitButton:active:not(:disabled) {
-    transform: translateY(0);
+    
 }
 
 .submitButton:disabled {
@@ -141,7 +140,7 @@
 
 @keyframes spin {
     to {
-        transform: rotate(360deg);
+        
     }
 }
 
