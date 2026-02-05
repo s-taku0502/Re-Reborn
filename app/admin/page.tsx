@@ -13,30 +13,64 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
-    const { admin, logout, isLoading } = useAdminAuth();
+    const { admin, logout, isLoading, getToken } = useAdminAuth();
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [statsLoading, setStatsLoading] = useState(true);
 
-    // ダッシュボード統計を取得（将来実装）
+    // ダッシュボード統計を取得
     useEffect(() => {
+        // 認証の初期化が完了していない場合は待機
+        if (isLoading) {
+            return;
+        }
+
+        // 認証されていない場合はスキップ（ProtectedAdminRouteがリダイレクトする）
+        if (!admin) {
+            setStatsLoading(false);
+            return;
+        }
+
         const fetchStats = async () => {
             try {
-                // 仮のデータ（API実装後に動的に取得）
-                setStats({
-                    totalUsers: 156,
-                    totalLogs: 1250,
-                    totalContacts: 42,
-                    pendingContacts: 3,
+                const token = getToken();
+                if (!token) {
+                    throw new Error('認証トークンがありません');
+                }
+
+                const response = await fetch('/api/admin/dashboard/stats', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
                 });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch stats: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.success && data.stats) {
+                    setStats(data.stats);
+                } else {
+                    throw new Error(data.error || '統計情報の取得に失敗しました');
+                }
             } catch (error) {
                 console.error('[Dashboard] Error fetching stats:', error);
+                // エラー時は空の統計を表示
+                setStats({
+                    totalUsers: 0,
+                    totalLogs: 0,
+                    totalContacts: 0,
+                    pendingContacts: 0,
+                });
             } finally {
                 setStatsLoading(false);
             }
         };
 
         fetchStats();
-    }, []);
+    }, [admin, isLoading, getToken]);
 
     if (isLoading) {
         return (

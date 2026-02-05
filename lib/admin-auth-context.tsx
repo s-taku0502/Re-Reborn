@@ -24,6 +24,7 @@ interface AdminAuthContextType {
     logout: () => void;
     refreshAuth: () => Promise<void>;
     setAdminAuth: (payload: AdminJWTPayload) => void;
+    getToken: () => string | null;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
@@ -164,6 +165,10 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const getToken = () => {
+        return getTokenFromStorage();
+    };
+
     return (
         <AdminAuthContext.Provider
             value={{
@@ -173,6 +178,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
                 logout,
                 refreshAuth,
                 setAdminAuth,
+                getToken,
             }}
         >
             {children}

@@ -53,6 +53,16 @@ function isCacheable(request) {
     
     // file スキームはキャッシュ不可
     if (request.url.startsWith('file://')) return false;
+
+    // 広告/解析系の外部スクリプトは SW で扱わない
+    if (
+        request.url.includes('googletagmanager.com') ||
+        request.url.includes('googlesyndication.com') ||
+        request.url.includes('adtrafficquality.google') ||
+        request.url.includes('doubleclick.net')
+    ) {
+        return false;
+    }
     
     return true;
 }
@@ -103,7 +113,9 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 })
                 .catch(() => {
-                    return caches.match(request);
+                    return caches.match(request).then((cached) => {
+                        return cached || new Response('Offline', { status: 503 });
+                    });
                 })
         );
         return;
@@ -122,7 +134,9 @@ self.addEventListener('fetch', (event) => {
                 return response;
             })
             .catch(() => {
-                return caches.match(request);
+                return caches.match(request).then((cached) => {
+                    return cached || new Response('Offline', { status: 503 });
+                });
             })
     );
 });

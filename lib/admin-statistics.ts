@@ -67,14 +67,18 @@ export async function getDailyStats(date: Date): Promise<DailyStats> {
         .get();
     const newContacts = newContactsSnapshot.size;
 
-    // お問い合わせ（解決）
+    // お問い合わせ（解決）- 複合インデックス不要にするため、メモリでフィルタリング
     const resolvedContactsSnapshot = await db
         .collection('contacts')
         .where('status', '==', 'resolved')
-        .where('updatedAt', '>=', dayStart)
-        .where('updatedAt', '<', dayEnd)
         .get();
-    const contactsResolved = resolvedContactsSnapshot.size;
+    
+    const contactsResolved = resolvedContactsSnapshot.docs.filter((doc) => {
+        const updatedAt = doc.data().updatedAt;
+        if (!updatedAt) return false;
+        const updatedDate = updatedAt.toDate();
+        return updatedDate >= dayStart && updatedDate < dayEnd;
+    }).length;
 
     return {
         date: dayStart.toISOString().split('T')[0],
@@ -154,14 +158,18 @@ export async function getMonthlyStats(year: number, month: number): Promise<Mont
         .get();
     const newContacts = newContactsSnapshot.size;
 
-    // お問い合わせ（解決）
+    // お問い合わせ（解決）- 複合インデックス不要にするため、メモリでフィルタリング
     const resolvedContactsSnapshot = await db
         .collection('contacts')
         .where('status', '==', 'resolved')
-        .where('updatedAt', '>=', monthStart)
-        .where('updatedAt', '<', monthEnd)
         .get();
-    const contactsResolved = resolvedContactsSnapshot.size;
+    
+    const contactsResolved = resolvedContactsSnapshot.docs.filter((doc) => {
+        const updatedAt = doc.data().updatedAt;
+        if (!updatedAt) return false;
+        const updatedDate = updatedAt.toDate();
+        return updatedDate >= monthStart && updatedDate < monthEnd;
+    }).length;
 
     return {
         month: `${year}-${String(month).padStart(2, '0')}`,
