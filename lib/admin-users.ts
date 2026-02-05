@@ -148,6 +148,11 @@ export async function getUserStats(): Promise<UserStats> {
         weekStart.setDate(weekStart.getDate() - 7);
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
+        // DateをFirestore Timestampに変換
+        const todayStartTimestamp = Timestamp.fromDate(todayStart);
+        const weekStartTimestamp = Timestamp.fromDate(weekStart);
+        const monthStartTimestamp = Timestamp.fromDate(monthStart);
+
         // 総ユーザー数
         const totalSnapshot = await db.collection('users').get();
         const totalUsers = totalSnapshot.size;
@@ -162,21 +167,21 @@ export async function getUserStats(): Promise<UserStats> {
         // 今日の新規ユーザー
         const todaySnapshot = await db
             .collection('users')
-            .where('createdAt', '>=', todayStart)
+            .where('createdAt', '>=', todayStartTimestamp)
             .get();
         const newUsersToday = todaySnapshot.size;
 
         // 今週の新規ユーザー
         const weekSnapshot = await db
             .collection('users')
-            .where('createdAt', '>=', weekStart)
+            .where('createdAt', '>=', weekStartTimestamp)
             .get();
         const newUsersThisWeek = weekSnapshot.size;
 
         // 今月の新規ユーザー
         const monthSnapshot = await db
             .collection('users')
-            .where('createdAt', '>=', monthStart)
+            .where('createdAt', '>=', monthStartTimestamp)
             .get();
         const newUsersThisMonth = monthSnapshot.size;
 

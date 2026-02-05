@@ -58,13 +58,29 @@ export async function GET(req: NextRequest) {
         // ユーザー一覧を取得
         const { users, total } = await getUsers(limit, offset, searchQuery);
 
-        // Timestampを文字列に変換
-        const usersResponse = users.map((user) => ({
-            ...user,
-            createdAt: user.createdAt.toDate().toISOString(),
-            updatedAt: user.updatedAt ? user.updatedAt.toDate().toISOString() : null,
-            lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toDate().toISOString() : null,
-        }));
+        // Timestampを文字列に変換（安全な変換）
+        const usersResponse = users.map((user) => {
+            const convertTimestamp = (timestamp: any): string | null => {
+                if (!timestamp) return null;
+                if (typeof timestamp === 'string') return timestamp;
+                if (timestamp instanceof Date) return timestamp.toISOString();
+                if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+                    return timestamp.toDate().toISOString();
+                }
+                if (timestamp._seconds !== undefined) {
+                    // Firestore Timestamp object with _seconds and _nanoseconds
+                    return new Date(timestamp._seconds * 1000).toISOString();
+                }
+                return null;
+            };
+
+            return {
+                ...user,
+                createdAt: convertTimestamp(user.createdAt),
+                updatedAt: convertTimestamp(user.updatedAt),
+                lastLoginAt: convertTimestamp(user.lastLoginAt),
+            };
+        });
 
         const response: any = {
             success: true,
