@@ -170,20 +170,22 @@
 
 .actionButton {
     background: white;
-    color: white;
-    border: none;
+    color: #1f2937;
+    border: 1px solid #333;
     padding: 0.5rem 1rem;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.875rem;
     font-weight: 600;
-    transition: transform 0.2s;
+    transition: all 0.2s;
     text-decoration: none;
     display: inline-block;
 }
 
 .actionButton:hover {
-    
+    background: #333;
+    color: white;
+    transform: translateY(-1px);
 }
 
 .pagination {
