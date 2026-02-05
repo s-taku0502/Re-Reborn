@@ -1,24 +1,10 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { hashPassword } from './password';
+import { getAdminApp } from './firebase-admin';
 
 /**
- * Firebase Admin SDK の初期化
+ * Firebase Admin SDK は firebase-admin.ts から取得
  */
-function getAdminApp() {
-  const apps = getApps();
-  if (apps.length > 0) {
-    return apps[0];
-  }
-
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_ADMIN_SDK_JSON || '{}'
-  );
-
-  return initializeApp({
-    credential: cert(serviceAccount),
-  });
-}
 
 /**
  * Firestore インスタンスを取得

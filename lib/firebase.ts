@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
 // Firebase設定（環境変数から取得）
 const firebaseConfig = {
@@ -26,6 +26,32 @@ if (typeof window !== 'undefined') {
 
     db = getFirestore(app);
     auth = getAuth(app);
+
+    // 匿名認証の自動サインイン
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            signInAnonymously(auth).catch((error) => {
+                console.error('匿名認証エラー:', error);
+            });
+        }
+    });
 }
 
 export { app, db, auth };
+
+/**
+ * Firebase匿名認証を確実に実行する
+ */
+export async function ensureAuthenticated(): Promise<void> {
+    if (typeof window === 'undefined') return;
+    
+    const currentUser = auth?.currentUser;
+    if (currentUser) return;
+
+    try {
+        await signInAnonymously(auth);
+    } catch (error) {
+        console.error('匿名認証失敗:', error);
+        throw new Error('認証に失敗しました');
+    }
+}
