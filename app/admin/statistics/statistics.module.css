@@ -1,0 +1,330 @@
+/* 統計ダッシュボード画面のスタイル */
+
+.statisticsContainer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.headerTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.tabButton {
+    padding: 0.625rem 1.25rem;
+    background: white;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tabButton:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.tabButton.active {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border-color: #6366f1;
+}
+
+.exportButton {
+    padding: 0.625rem 1.25rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.exportButton:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+.exportButton:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 統計カード */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.statCard {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #6366f1;
+}
+
+.statCard.secondary {
+    border-left-color: #8b5cf6;
+}
+
+.statCard.success {
+    border-left-color: #10b981;
+}
+
+.statCard.warning {
+    border-left-color: #f59e0b;
+}
+
+.statLabel {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+.statChange {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.statChangePositive {
+    color: #10b981;
+}
+
+.statChangeNegative {
+    color: #ef4444;
+}
+
+/* チャート & テーブルコンテナ */
+.content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.contentTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* テーブル */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.table th {
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+    color: #111827;
+}
+
+.table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 数値バッジ */
+.numberHighlight {
+    font-weight: 700;
+    color: #6366f1;
+}
+
+/* グラフプレースホルダー */
+.chartPlaceholder {
+    height: 300px;
+    background: #f9fafb;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 1rem;
+}
+
+/* メッセージ */
+.errorMessage {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.successMessage {
+    background: #d1fae5;
+    border: 1px solid #6ee7b7;
+    color: #065f46;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+/* ローディング */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 空の状態 */
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    color: #9ca3af;
+}
+
+.emptyState p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* レスポンシブ */
+@media (max-width: 1024px) {
+    .statsGrid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .statCard {
+        padding: 1rem;
+    }
+
+    .statValue {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .statisticsContainer {
+        padding: 1rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .headerTop {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .controls {
+        flex-direction: column;
+    }
+
+    .tabButton,
+    .exportButton {
+        width: 100%;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .content {
+        padding: 1rem;
+    }
+
+    .table {
+        font-size: 0.875rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+    }
+
+    .chartPlaceholder {
+        height: 200px;
+    }
+}
