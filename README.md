@@ -205,7 +205,7 @@ curl -X POST http://localhost:3000/api/admin/setup \
 
 ---
 
-## 🗂 ディレクトリ構造
+## ディレクトリ構造
 
 ```
 sanpo-app/
@@ -287,7 +287,7 @@ sanpo-app/
 
 ---
 
-## 🔌 API Routes
+## API Routes
 
 ### ユーザー向けAPI
 
@@ -327,7 +327,7 @@ sanpo-app/
 
 ---
 
-## 🔐 セキュリティ対策
+## セキュリティ対策
 
 ### 認証アーキテクチャ
 
@@ -433,7 +433,7 @@ match /contacts/{contactId} {
 
 ---
 
-## 🎨 デザイン原則
+## デザイン原則
 
 ### UIコンセプト
 
@@ -458,7 +458,7 @@ match /contacts/{contactId} {
 
 ---
 
-## 📊 Firestore データスキーマ
+## Firestore データスキーマ
 
 ### ユーザーコレクション
 
@@ -526,7 +526,7 @@ interface Contact {
 
 ---
 
-## 🚀 デプロイ
+## デプロイ
 
 ### Vercel へのデプロイ
 
@@ -557,7 +557,7 @@ firebase deploy --only firestore:indexes
 
 ---
 
-## 🧪 テスト
+## テスト
 
 ### 手動テスト
 
@@ -583,7 +583,7 @@ firebase deploy --only firestore:indexes
 
 ---
 
-## 🔮 今後の拡張予定
+## 今後の拡張予定
 
 ### Phase 2（Q2 2026）
 
@@ -607,25 +607,25 @@ firebase deploy --only firestore:indexes
 
 ---
 
-## 📝 ライセンス
+## ライセンス
 
 個人開発プロジェクト（非商用）
 
 ---
 
-## 🤝 コントリビューション
+## コントリビューション
 
 現在は個人開発プロジェクトのため、外部からのコントリビューションは受け付けていません。
 
 ---
 
-## 📧 お問い合わせ
+## お問い合わせ
 
 アプリ内の「お問い合わせ」ページからご連絡ください。
 
 ---
 
-## 📚 ドキュメント
+## ドキュメント
 
 詳細な技術仕様・要件定義は `non-public/` ディレクトリを参照してください：
 
@@ -637,7 +637,7 @@ firebase deploy --only firestore:indexes
 
 ---
 
-## 🎉 主要な実装履歴
+## 主要な実装履歴
 
 ### 2026年2月
 
