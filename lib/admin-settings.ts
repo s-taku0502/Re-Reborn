@@ -22,6 +22,7 @@ export interface SystemSettings {
         oracle: boolean;
         album: boolean;
         contact: boolean;
+        sharing: boolean;
     };
 
     // 広告設定
@@ -84,6 +85,7 @@ export async function initializeSystemSettings(): Promise<SystemSettings> {
                 oracle: true,
                 album: true,
                 contact: true,
+                sharing: false,
             },
             advertising: {
                 enabled: false,
@@ -192,6 +194,7 @@ export async function getFeatureFlags(): Promise<{
     oracle: boolean;
     album: boolean;
     contact: boolean;
+    sharing: boolean;
 }> {
     try {
         const settings = await getSystemSettings();
@@ -202,6 +205,7 @@ export async function getFeatureFlags(): Promise<{
                 oracle: true,
                 album: true,
                 contact: true,
+                sharing: false,
             };
         }
 
@@ -213,6 +217,7 @@ export async function getFeatureFlags(): Promise<{
             oracle: true,
             album: true,
             contact: true,
+            sharing: false,
         };
     }
 }

@@ -141,6 +141,7 @@ export async function PATCH(req: NextRequest) {
                 oracle: body.features.oracle ?? true,
                 album: body.features.album ?? true,
                 contact: body.features.contact ?? true,
+                sharing: body.features.sharing ?? false,
             };
         }
 
@@ -161,18 +162,18 @@ export async function PATCH(req: NextRequest) {
         await updateSystemSettings(admin.adminId, updates);
 
         // 監査ログ記録
-    await recordAuditLog(
-      admin.adminId,
-      'update',
-      'settings',
-      'system',
-      {
-        before: {},
-        after: Object.keys(updates),
-      },
-      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown',
-      req.headers.get('user-agent') || 'unknown'
-    );
+        await recordAuditLog(
+            admin.adminId,
+            'update',
+            'settings',
+            'system',
+            {
+                before: {},
+                after: Object.keys(updates),
+            },
+            req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown',
+            req.headers.get('user-agent') || 'unknown'
+        );
         return NextResponse.json({
             success: true,
             message: 'システム設定を更新しました',

@@ -65,6 +65,22 @@ export async function POST(req: NextRequest) {
         const missionText = String(body?.missionText || '').trim();
         const imageUrl = body?.imageUrl ? String(body.imageUrl).trim() : undefined;
         const imageData = body?.imageData ? String(body.imageData) : undefined;
+        const imageSource = body?.imageSource === 'camera'
+            ? 'camera'
+            : body?.imageSource === 'gallery'
+                ? 'gallery'
+                : undefined;
+        const imageCapturedAt = body?.imageCapturedAt ? String(body.imageCapturedAt) : undefined;
+        const imageExifAvailable = typeof body?.imageExifAvailable === 'boolean'
+            ? Boolean(body.imageExifAvailable)
+            : undefined;
+        const imageFlagReasons = Array.isArray(body?.imageFlagReasons)
+            ? body.imageFlagReasons
+                .filter((item: unknown) => typeof item === 'string')
+                .map((item: string) => item.trim())
+                .filter((item: string) => item.length > 0)
+            : undefined;
+        const imageFlagged = imageFlagReasons ? imageFlagReasons.length > 0 : undefined;
         const locationName = body?.location?.name ? sanitizeTextInput(String(body.location.name)) : undefined;
         const memo = body?.memo ? sanitizeTextInput(String(body.memo)) : undefined;
         const isPublic = Boolean(body?.isPublic);
@@ -118,6 +134,11 @@ export async function POST(req: NextRequest) {
             missionText,
             imageUrl,
             imageData,
+            imageSource,
+            imageCapturedAt,
+            imageExifAvailable,
+            imageFlagReasons,
+            imageFlagged,
             location: locationName ? { name: locationName } : undefined,
             memo,
             isPublic,

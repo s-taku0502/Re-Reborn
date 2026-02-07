@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mission, UserLog } from '@/lib/types';
 import { getErrorMessage, showErrorNotification, checkImageSize } from '@/lib/errorHandler';
 import { isCloudinaryConfigured, uploadImageFile } from '@/lib/cloudinary';
 import { compressImageToFile, formatFileSize } from '@/lib/imageCompression';
+import { getImageCaptureMetadata, ImageCaptureMetadata } from '@/lib/imageMetadata';
+import { openGalleryPicker } from '@/lib/imageSelection';
 import { MAX_LOCATION_LENGTH, MAX_MEMO_LENGTH, sanitizeTextInput, validateLocation, validateMemo } from '@/lib/validation';
 import styles from './record.module.css';
 
@@ -18,6 +20,11 @@ function RecordContent() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [imageSource, setImageSource] = useState<'camera' | 'gallery' | null>(null);
+    const [imageCapturedAt, setImageCapturedAt] = useState<Date | null>(null);
+    const [imageExifAvailable, setImageExifAvailable] = useState(false);
+    const [imageFlagReasons, setImageFlagReasons] = useState<string[]>([]);
+    const [sharingEnabled, setSharingEnabled] = useState(false);
     const [memo, setMemo] = useState('');
     const [location, setLocation] = useState('');
     const [isSaving, setIsSaving] = useState(false);
@@ -31,6 +38,22 @@ function RecordContent() {
             return;
         }
         setUserId(storedUserId);
+
+        // 共有機能の有効化状態を確認
+        const fetchSharingStatus = async () => {
+            try {
+                const response = await fetch('/api/settings/features');
+                if (response.ok) {
+                    const data = await response.json();
+                    setSharingEnabled(data.features?.sharing ?? false);
+                }
+            } catch (error) {
+                console.warn('[Record] Failed to fetch sharing status:', error);
+                setSharingEnabled(false);
+            }
+        };
+
+        fetchSharingStatus();
 
         // URLパラメータからミッション情報を取得
         const missionParam = searchParams.get('mission');
@@ -66,6 +89,44 @@ function RecordContent() {
         try {
             setUploadMessage('画像を圧縮中...');
 
+            // EXIF メタデータを取得（共有機能が有効な場合のみ）
+            let capturedAt: Date | null = null;
+            let exifAvailable = false;
+            const flagReasons: string[] = [];
+
+            if (sharingEnabled) {
+                try {
+                    const metadata = await getImageCaptureMetadata(file);
+                    exifAvailable = metadata.exifAvailable;
+                    capturedAt = metadata.capturedAt;
+
+                    // 撮影時刻の検証
+                    const now = new Date();
+                    if (!capturedAt) {
+                        flagReasons.push('EXIF撮影時刻なし');
+                    } else if (capturedAt > now) {
+                        flagReasons.push('EXIF撮影時刻が未来');
+                    } else {
+                        const diffMinutes = (now.getTime() - capturedAt.getTime()) / (1000 * 60);
+                        if (diffMinutes > 10) {
+                            flagReasons.push('撮影から10分以上経過');
+                        }
+                        if (diffMinutes > 24 * 60) {
+                            flagReasons.push('撮影から24時間以上経過');
+                        }
+                    }
+
+                    console.log('[Record] Image EXIF check:', {
+                        capturedAt: capturedAt ? capturedAt.toISOString() : null,
+                        exifAvailable,
+                        flagReasons,
+                    });
+                } catch (error) {
+                    console.warn('[Record] EXIF metadata extraction failed:', error);
+                    flagReasons.push('メタデータエラー');
+                }
+            }
+
             // 画像を圧縮（1024x1024、品質80%）
             const compressedFile = await compressImageToFile(file, {
                 maxWidth: 1024,
@@ -95,6 +156,10 @@ function RecordContent() {
             const objectUrl = URL.createObjectURL(compressedFile);
             setPreviewUrl(objectUrl);
             setImageFile(compressedFile);
+            setImageSource('camera');
+            setImageCapturedAt(capturedAt);
+            setImageExifAvailable(exifAvailable);
+            setImageFlagReasons(flagReasons);
             setUploadMessage(`画像を圧縮しました: ${formatFileSize(compressedFile.size)}`);
 
             // Cloudinaryに即座にアップロード（メモリ節約）
@@ -104,14 +169,14 @@ function RecordContent() {
                     const uploadedUrl = await uploadImageFile(compressedFile, userId);
                     setImageUrl(uploadedUrl);
                     setImageFile(null); // アップロード完了後、ファイルは不要
-                    
+
                     // blob URLを解放してメモリ節約
                     if (objectUrl.startsWith('blob:')) {
                         URL.revokeObjectURL(objectUrl);
                     }
                     setPreviewUrl(uploadedUrl); // Cloudinary URLでプレビュー
                     setUploadMessage('画像アップロード完了');
-                    
+
                     // 成功メッセージを2秒後に消す
                     setTimeout(() => setUploadMessage(null), 2000);
                 } catch (uploadError) {
@@ -170,6 +235,10 @@ function RecordContent() {
                     missionId: mission.id,
                     missionText: mission.text,
                     imageUrl: finalImageUrl,
+                    imageSource: imageSource || 'camera',
+                    imageCapturedAt: imageCapturedAt ? imageCapturedAt.toISOString() : undefined,
+                    imageExifAvailable,
+                    imageFlagReasons: imageFlagReasons.length > 0 ? imageFlagReasons : undefined,
                     location: sanitizedLocation ? { name: sanitizedLocation } : undefined,
                     memo: sanitizedMemo || undefined,
                     status: 'completed', // 完了ステータス
@@ -220,20 +289,48 @@ function RecordContent() {
                     <label className={styles.label}>写真</label>
                     <div className={styles.imageInputContainer}>
                         {!previewUrl ? (
-                            <label htmlFor="imageInput" className={styles.imageInputLabel}>
-                                <input
-                                    key={previewUrl ? 'hidden' : 'visible'}
-                                    type="file"
-                                    id="imageInput"
-                                    accept="image/*"
-                                    capture="environment"
-                                    onChange={handleImageCapture}
-                                    className={styles.imageInput}
-                                />
-                                <div className={styles.imageInputPlaceholder}>
-                                    📷 写真を撮る
-                                </div>
-                            </label>
+                            <div className={styles.imageInputOptions}>
+                                <label htmlFor="imageInput" className={styles.imageInputLabel}>
+                                    <input
+                                        key={previewUrl ? 'hidden' : 'visible'}
+                                        type="file"
+                                        id="imageInput"
+                                        accept="image/*"
+                                        capture="environment"
+                                        onChange={handleImageCapture}
+                                        className={styles.imageInput}
+                                    />
+                                    <div className={styles.imageInputPlaceholder}>
+                                        📷 写真を撮る
+                                    </div>
+                                </label>
+
+                                {sharingEnabled && (
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            try {
+                                                const galleryFile = await openGalleryPicker();
+                                                if (galleryFile) {
+                                                    // ギャラリー選択の場合のイベント作成（手動処理）
+                                                    const syntheticEvent = {
+                                                        target: {
+                                                            files: [galleryFile],
+                                                        },
+                                                    } as unknown as ChangeEvent<HTMLInputElement>;
+                                                    await handleImageCapture(syntheticEvent);
+                                                }
+                                            } catch (error) {
+                                                console.error('Gallery picker error:', error);
+                                                showErrorNotification('ギャラリーから選択できませんでした');
+                                            }
+                                        }}
+                                        className={styles.galleryButton}
+                                    >
+                                        🖼️ ギャラリーから選択
+                                    </button>
+                                )}
+                            </div>
                         ) : (
                             <div className={styles.imagePreview}>
                                 <img src={previewUrl} alt="撮影した写真" className={styles.previewImage} />
@@ -241,6 +338,10 @@ function RecordContent() {
                                     onClick={() => {
                                         setImageFile(null);
                                         setImageUrl(null);
+                                        setImageSource(null);
+                                        setImageCapturedAt(null);
+                                        setImageExifAvailable(false);
+                                        setImageFlagReasons([]);
                                         if (previewUrl && previewUrl.startsWith('blob:')) {
                                             URL.revokeObjectURL(previewUrl);
                                         }

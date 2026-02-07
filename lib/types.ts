@@ -17,6 +17,11 @@ export interface UserLog {
     missionId: string;
     imageUrl?: string;
     imageData?: string; // Base64 encoded image for local storage
+    imageSource?: 'camera' | 'gallery';
+    imageCapturedAt?: Date | string | null;
+    imageExifAvailable?: boolean;
+    imageFlagReasons?: string[];
+    imageFlagged?: boolean;
     location?: {
         name: string;
         latitude?: number;

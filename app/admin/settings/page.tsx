@@ -17,6 +17,7 @@ interface SystemSettings {
         oracle: boolean;
         album: boolean;
         contact: boolean;
+        sharing: boolean;
     };
     advertising: {
         enabled: boolean;
@@ -328,6 +329,27 @@ export default function SettingsPage() {
                                 <span className={styles.featureToggleSlider}></span>
                             </label>
                             <span className={styles.featureLabel}>✉️ お問い合わせ</span>
+                        </div>
+
+                        <div className={styles.featureItem}>
+                            <label className={styles.featureToggle}>
+                                <input
+                                    type="checkbox"
+                                    className={styles.featureToggleInput}
+                                    checked={settings.features.sharing}
+                                    onChange={(e) =>
+                                        setSettings({
+                                            ...settings,
+                                            features: {
+                                                ...settings.features,
+                                                sharing: e.target.checked,
+                                            },
+                                        })
+                                    }
+                                />
+                                <span className={styles.featureToggleSlider}></span>
+                            </label>
+                            <span className={styles.featureLabel}>🔗 共有機能</span>
                         </div>
                     </div>
                 </div>
