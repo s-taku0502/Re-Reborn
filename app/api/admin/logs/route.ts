@@ -72,10 +72,11 @@ export async function GET(req: NextRequest) {
 
             logsSnapshot.forEach((doc: QueryDocumentSnapshot) => {
                 const data = doc.data();
+                // ドキュメントデータを先に展開し、その後で正しいlogIdとuserIdを上書き
                 allLogs.push({
-                    logId: doc.id,
-                    userId: userId,
                     ...data,
+                    logId: doc.id,
+                    userId: userId, // コレクションパスから取得した正しいuserIdを優先
                     createdAt: data.createdAt instanceof Object
                         ? data.createdAt.toDate?.().toISOString() || data.createdAt.toString()
                         : data.createdAt,

@@ -98,12 +98,21 @@
     font-size: 1rem;
 }
 
+/* タブコンテナ */
+.tabsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
 /* タブ */
 .tabs {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid #e5e7eb;
+    flex: 1;
 }
 
 .tab {
@@ -125,6 +134,30 @@
 .tabActive {
     color: #111827;
     border-bottom-color: #111827;
+}
+
+/* 更新ボタン */
+.refreshButton {
+    padding: 0.5rem 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #111827;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.refreshButton:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.refreshButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .logsList {

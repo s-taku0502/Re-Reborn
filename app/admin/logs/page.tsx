@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import styles from './logs.module.css';
 import { useAdminAuth, ProtectedAdminRoute } from '@/lib/admin-auth-context';
@@ -27,44 +27,44 @@ export default function AdminLogsPage() {
     const [reviewedFilter, setReviewedFilter] = useState<'unreviewed' | 'all' | 'reviewed'>('unreviewed');
     const [updatingLogId, setUpdatingLogId] = useState<string | null>(null);
 
+    const fetchLogs = useCallback(async () => {
+        try {
+            setIsLoading2(true);
+            setError(null);
+            const token = getTokenFromStorage();
+
+            const response = await fetch(
+                `/api/admin/logs?flaggedOnly=true&limit=${limit}&page=${page}&reviewed=${reviewedFilter}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('ログ取得エラー');
+            }
+
+            const data = await response.json();
+            console.log('[Admin Logs] Fetched logs:', {
+                count: data.logs.length,
+                sampleLog: data.logs[0],
+            });
+            setLogs(data.logs);
+            setTotal(data.total);
+        } catch (err) {
+            console.error('[Admin Logs] Error:', err);
+            setError('ログの取得に失敗しました');
+        } finally {
+            setIsLoading2(false);
+        }
+    }, [limit, page, reviewedFilter]);
+
     useEffect(() => {
         if (!admin || isLoading) return;
-
-        const fetchLogs = async () => {
-            try {
-                setIsLoading2(true);
-                const token = getTokenFromStorage();
-
-                const response = await fetch(
-                    `/api/admin/logs?flaggedOnly=true&limit=${limit}&page=${page}&reviewed=${reviewedFilter}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error('ログ取得エラー');
-                }
-
-                const data = await response.json();
-                console.log('[Admin Logs] Fetched logs:', {
-                    count: data.logs.length,
-                    sampleLog: data.logs[0],
-                });
-                setLogs(data.logs);
-                setTotal(data.total);
-            } catch (err) {
-                console.error('[Admin Logs] Error:', err);
-                setError('ログの取得に失敗しました');
-            } finally {
-                setIsLoading2(false);
-            }
-        };
-
         fetchLogs();
-    }, [admin, isLoading, page, limit, reviewedFilter]);
+    }, [admin, isLoading, fetchLogs]);
 
     const handleMarkAsReviewed = async (log: FlaggedLog) => {
         try {
@@ -77,11 +77,15 @@ export default function AdminLogsPage() {
                 throw new Error('認証トークンが見つかりません。再ログインしてください。');
             }
 
+            // 現在の状態を反転させる（true → false, false → true）
+            const newReviewedState = !log.reviewed;
+
             console.log('[Admin Logs] Sending PUT request:', {
                 url: '/api/admin/logs',
                 userId: log.userId,
                 logId: log.logId,
-                reviewed: !log.reviewed,
+                currentReviewed: log.reviewed,
+                newReviewed: newReviewedState,
             });
 
             const response = await fetch('/api/admin/logs', {
@@ -93,7 +97,7 @@ export default function AdminLogsPage() {
                 body: JSON.stringify({
                     userId: log.userId,
                     logId: log.logId,
-                    reviewed: !log.reviewed,
+                    reviewed: newReviewedState,
                 }),
             });
 
@@ -111,8 +115,8 @@ export default function AdminLogsPage() {
             const result = await response.json();
             console.log('[Admin Logs] Update success:', result);
 
-            // ローカル state を更新
-            setLogs(logs.map(l => l.logId === log.logId ? { ...l, reviewed: !l.reviewed } : l));
+            // ローカル state を更新（現在の状態を反転）
+            setLogs(logs.map(l => l.logId === log.logId ? { ...l, reviewed: newReviewedState } : l));
         } catch (err) {
             console.error('[Admin Logs] Update error:', err);
             const errorMsg = err instanceof Error ? err.message : 'ログの更新に失敗しました';
@@ -148,34 +152,44 @@ export default function AdminLogsPage() {
 
                 {error && <div className={styles.errorMessage}>{error}</div>}
 
-                {/* タブ */}
-                <div className={styles.tabs}>
+                {/* タブと更新ボタン */}
+                <div className={styles.tabsContainer}>
+                    <div className={styles.tabs}>
+                        <button
+                            className={`${styles.tab} ${reviewedFilter === 'unreviewed' ? styles.tabActive : ''}`}
+                            onClick={() => {
+                                setReviewedFilter('unreviewed');
+                                setPage(0);
+                            }}
+                        >
+                            未確認
+                        </button>
+                        <button
+                            className={`${styles.tab} ${reviewedFilter === 'all' ? styles.tabActive : ''}`}
+                            onClick={() => {
+                                setReviewedFilter('all');
+                                setPage(0);
+                            }}
+                        >
+                            全て
+                        </button>
+                        <button
+                            className={`${styles.tab} ${reviewedFilter === 'reviewed' ? styles.tabActive : ''}`}
+                            onClick={() => {
+                                setReviewedFilter('reviewed');
+                                setPage(0);
+                            }}
+                        >
+                            確認済み
+                        </button>
+                    </div>
                     <button
-                        className={`${styles.tab} ${reviewedFilter === 'unreviewed' ? styles.tabActive : ''}`}
-                        onClick={() => {
-                            setReviewedFilter('unreviewed');
-                            setPage(0);
-                        }}
+                        className={styles.refreshButton}
+                        onClick={fetchLogs}
+                        disabled={isLoading2}
+                        title="画面を更新"
                     >
-                        未確認
-                    </button>
-                    <button
-                        className={`${styles.tab} ${reviewedFilter === 'all' ? styles.tabActive : ''}`}
-                        onClick={() => {
-                            setReviewedFilter('all');
-                            setPage(0);
-                        }}
-                    >
-                        全て
-                    </button>
-                    <button
-                        className={`${styles.tab} ${reviewedFilter === 'reviewed' ? styles.tabActive : ''}`}
-                        onClick={() => {
-                            setReviewedFilter('reviewed');
-                            setPage(0);
-                        }}
-                    >
-                        確認済み
+                        🔄 更新
                     </button>
                 </div>
 
