@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import styles from './settings.module.css';
 import { useAdminAuth, ProtectedAdminRoute } from '@/lib/admin-auth-context';
 import { getTokenFromStorage } from '@/lib/admin-jwt';
+
+type TabType = 'maintenance' | 'features' | 'advertising';
 
 interface SystemSettings {
     maintenanceMode: {
@@ -45,12 +48,40 @@ const MAINTENANCE_PATH_OPTIONS = [
 ];
 
 export default function SettingsPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const { admin, isLoading: authLoading } = useAdminAuth();
+    const [activeTab, setActiveTab] = useState<TabType>('maintenance');
     const [settings, setSettings] = useState<SystemSettings | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    // URLパラメータからタブを初期化
+    useEffect(() => {
+        const tab = searchParams.get('tab') as TabType;
+        if (tab && ['maintenance', 'features', 'advertising'].includes(tab)) {
+            setActiveTab(tab);
+        }
+    }, [searchParams]);
+
+    // メンテナンスモードが実際に有効かどうかを判定（時間範囲を考慮）
+    const isMaintenanceActive = (maintenance: SystemSettings['maintenanceMode']): boolean => {
+        if (!maintenance.enabled) return false;
+        if (!maintenance.startDate || !maintenance.endDate) return true;
+
+        const now = new Date();
+        const parseJstDate = (value: string): Date => {
+            const hasTimezone = /([zZ]|[+-]\d{2}:\d{2})$/.test(value);
+            return new Date(hasTimezone ? value : `${value}+09:00`);
+        };
+
+        const start = parseJstDate(maintenance.startDate);
+        const end = parseJstDate(maintenance.endDate);
+        return now >= start && now <= end;
+    };
 
     // 設定を取得
     useEffect(() => {
@@ -99,6 +130,41 @@ export default function SettingsPage() {
         fetchSettings();
     }, [admin, authLoading]);
 
+    // メンテナンス時間範囲がある場合、1分ごとに再レンダリング
+    useEffect(() => {
+        if (!settings?.maintenanceMode.enabled) return;
+        if (!settings.maintenanceMode.startDate || !settings.maintenanceMode.endDate) return;
+
+        const interval = setInterval(() => {
+            // 強制的に再レンダリング（stateを更新）
+            // 注意: hasUnsavedChangesはリセットしない
+            setSettings((prev) => {
+                if (!prev) return null;
+                return { ...prev };
+            });
+        }, 60000); // 1分ごと
+
+        return () => clearInterval(interval);
+    }, [settings?.maintenanceMode.enabled, settings?.maintenanceMode.startDate, settings?.maintenanceMode.endDate]);
+
+    // タブ切り替え
+    const handleTabChange = (tab: TabType) => {
+        setActiveTab(tab);
+        router.push(`/admin/settings?tab=${tab}`, { scroll: false });
+    };
+
+    // 設定変更時に未保存フラグを立てる
+    const updateSettings = (newSettings: SystemSettings) => {
+        console.log('[Settings] updateSettings called, setting hasUnsavedChanges to true');
+        setHasUnsavedChanges(true);
+        setSettings(newSettings);
+    };
+
+    // デバッグ用
+    useEffect(() => {
+        console.log('[Settings] hasUnsavedChanges:', hasUnsavedChanges);
+    }, [hasUnsavedChanges]);
+
     const handleSave = async () => {
         if (!settings) return;
 
@@ -131,6 +197,7 @@ export default function SettingsPage() {
             }
 
             setSuccessMessage('設定を保存しました');
+            setHasUnsavedChanges(false);
             setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err) {
             console.error('[Settings] Error saving settings:', err);
@@ -168,17 +235,57 @@ export default function SettingsPage() {
                 <div className={styles.header}>
                     <h1 className={styles.title}>⚙️ システム設定</h1>
                     <p className={styles.subtitle}>
-                        アプリケーション全体の設定を管理します（スーパー管理者のみ）
+                        アプリケーション全体の設定を管理します
                     </p>
+                </div>
+
+                {/* タブナビゲーション */}
+                <div className={styles.tabNav}>
+                    <button
+                        className={`${styles.tabButton} ${activeTab === 'maintenance' ? styles.tabButtonActive : ''}`}
+                        onClick={() => handleTabChange('maintenance')}
+                    >
+                        🚧 メンテナンス
+                    </button>
+                    <button
+                        className={`${styles.tabButton} ${activeTab === 'features' ? styles.tabButtonActive : ''}`}
+                        onClick={() => handleTabChange('features')}
+                    >
+                        🔧 機能トグル
+                    </button>
+                    <button
+                        className={`${styles.tabButton} ${activeTab === 'advertising' ? styles.tabButtonActive : ''}`}
+                        onClick={() => handleTabChange('advertising')}
+                    >
+                        📢 広告設定
+                    </button>
                 </div>
 
                 {error && <div className={styles.errorMessage}>{error}</div>}
                 {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
+                
+                {/* デバッグ情報（開発時のみ表示） */}
+                {process.env.NODE_ENV === 'development' && (
+                    <div style={{ 
+                        padding: '0.5rem 1rem', 
+                        background: '#f0f0f0', 
+                        borderRadius: '4px',
+                        marginBottom: '1rem',
+                        fontSize: '0.85rem',
+                        fontFamily: 'monospace'
+                    }}>
+                        Debug: hasUnsavedChanges = {hasUnsavedChanges ? 'true' : 'false'}
+                    </div>
+                )}
 
                 {/* メンテナンスモード */}
+                {activeTab === 'maintenance' && (
                 <div className={styles.section}>
                     <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>🚧 メンテナンスモード</h2>
+                        <h2 className={styles.sectionTitle}>🚧 メンテナンスモード設定</h2>
+                        <p className={styles.sectionDescription}>
+                            メンテナンス期間中に特定のページを利用不可にできます
+                        </p>
                     </div>
 
                     <div className={styles.maintenanceToggle}>
@@ -188,7 +295,7 @@ export default function SettingsPage() {
                                 className={styles.toggleInput}
                                 checked={settings.maintenanceMode.enabled}
                                 onChange={(e) =>
-                                    setSettings({
+                                    updateSettings({
                                         ...settings,
                                         maintenanceMode: {
                                             ...settings.maintenanceMode,
@@ -200,7 +307,15 @@ export default function SettingsPage() {
                             <span className={styles.toggleSlider}></span>
                         </label>
                         <span className={styles.toggleLabel}>
-                            {settings.maintenanceMode.enabled ? 'メンテナンス中' : 'メンテナンス解除'}
+                            {settings.maintenanceMode.enabled ? (
+                                isMaintenanceActive(settings.maintenanceMode) ? (
+                                    <span style={{ color: '#dc2626' }}>🔴 メンテナンス中</span>
+                                ) : (
+                                    <span style={{ color: '#ea580c' }}>🟠 メンテナンス予約中（時間外）</span>
+                                )
+                            ) : (
+                                'メンテナンス解除'
+                            )}
                         </span>
                     </div>
 
@@ -210,7 +325,7 @@ export default function SettingsPage() {
                             className={styles.textarea}
                             value={settings.maintenanceMode.message}
                             onChange={(e) =>
-                                setSettings({
+                                updateSettings({
                                     ...settings,
                                     maintenanceMode: {
                                         ...settings.maintenanceMode,
@@ -219,6 +334,7 @@ export default function SettingsPage() {
                                 })
                             }
                             placeholder="ユーザーに表示するメッセージを入力..."
+                            rows={4}
                         />
                     </div>
 
@@ -230,7 +346,7 @@ export default function SettingsPage() {
                                 className={styles.input}
                                 value={settings.maintenanceMode.startDate || ''}
                                 onChange={(e) =>
-                                    setSettings({
+                                    updateSettings({
                                         ...settings,
                                         maintenanceMode: {
                                             ...settings.maintenanceMode,
@@ -247,7 +363,7 @@ export default function SettingsPage() {
                                 className={styles.input}
                                 value={settings.maintenanceMode.endDate || ''}
                                 onChange={(e) =>
-                                    setSettings({
+                                    updateSettings({
                                         ...settings,
                                         maintenanceMode: {
                                             ...settings.maintenanceMode,
@@ -277,7 +393,7 @@ export default function SettingsPage() {
                                                         : settings.maintenanceMode.blockedPaths.filter(
                                                             (path) => path !== option.path
                                                         );
-                                                    setSettings({
+                                                    updateSettings({
                                                         ...settings,
                                                         maintenanceMode: {
                                                             ...settings.maintenanceMode,
@@ -294,12 +410,15 @@ export default function SettingsPage() {
                             })}
                         </div>
                     </div>
-                </div>
-
+                </div>                )}
                 {/* 機能トグル */}
+                {activeTab === 'features' && (
                 <div className={styles.section}>
                     <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>🔧 機能トグル</h2>
+                        <h2 className={styles.sectionTitle}>🔧 機能トグル設定</h2>
+                        <p className={styles.sectionDescription}>
+                            各機能の有効/無効を切り替えます
+                        </p>
                     </div>
 
                     <div className={styles.featureGrid}>
@@ -310,7 +429,7 @@ export default function SettingsPage() {
                                     className={styles.featureToggleInput}
                                     checked={settings.features.walkingLogs}
                                     onChange={(e) =>
-                                        setSettings({
+                                        updateSettings({
                                             ...settings,
                                             features: {
                                                 ...settings.features,
@@ -331,7 +450,7 @@ export default function SettingsPage() {
                                     className={styles.featureToggleInput}
                                     checked={settings.features.oracle}
                                     onChange={(e) =>
-                                        setSettings({
+                                        updateSettings({
                                             ...settings,
                                             features: {
                                                 ...settings.features,
@@ -352,7 +471,7 @@ export default function SettingsPage() {
                                     className={styles.featureToggleInput}
                                     checked={settings.features.album}
                                     onChange={(e) =>
-                                        setSettings({
+                                        updateSettings({
                                             ...settings,
                                             features: {
                                                 ...settings.features,
@@ -373,7 +492,7 @@ export default function SettingsPage() {
                                     className={styles.featureToggleInput}
                                     checked={settings.features.contact}
                                     onChange={(e) =>
-                                        setSettings({
+                                        updateSettings({
                                             ...settings,
                                             features: {
                                                 ...settings.features,
@@ -394,7 +513,7 @@ export default function SettingsPage() {
                                     className={styles.featureToggleInput}
                                     checked={settings.features.sharing}
                                     onChange={(e) =>
-                                        setSettings({
+                                        updateSettings({
                                             ...settings,
                                             features: {
                                                 ...settings.features,
@@ -409,11 +528,16 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 </div>
+                )}
 
                 {/* 広告設定 */}
+                {activeTab === 'advertising' && (
                 <div className={styles.section}>
                     <div className={styles.sectionHeader}>
                         <h2 className={styles.sectionTitle}>📢 広告表示設定</h2>
+                        <p className={styles.sectionDescription}>
+                            広告の表示/非表示とページ単位の設定を管理します
+                        </p>
                     </div>
 
                     <div className={styles.adToggle}>
@@ -423,7 +547,7 @@ export default function SettingsPage() {
                                 className={styles.toggleInput}
                                 checked={settings.advertising.enabled}
                                 onChange={(e) =>
-                                    setSettings({
+                                    updateSettings({
                                         ...settings,
                                         advertising: {
                                             ...settings.advertising,
@@ -449,7 +573,7 @@ export default function SettingsPage() {
                                         className={styles.featureToggleInput}
                                         checked={settings.advertising.positions.topPage}
                                         onChange={(e) =>
-                                            setSettings({
+                                            updateSettings({
                                                 ...settings,
                                                 advertising: {
                                                     ...settings.advertising,
@@ -474,7 +598,7 @@ export default function SettingsPage() {
                                         className={styles.featureToggleInput}
                                         checked={settings.advertising.positions.recordPage}
                                         onChange={(e) =>
-                                            setSettings({
+                                            updateSettings({
                                                 ...settings,
                                                 advertising: {
                                                     ...settings.advertising,
@@ -499,7 +623,7 @@ export default function SettingsPage() {
                                         className={styles.featureToggleInput}
                                         checked={settings.advertising.positions.oraclePage}
                                         onChange={(e) =>
-                                            setSettings({
+                                            updateSettings({
                                                 ...settings,
                                                 advertising: {
                                                     ...settings.advertising,
@@ -524,7 +648,7 @@ export default function SettingsPage() {
                                         className={styles.featureToggleInput}
                                         checked={settings.advertising.positions.albumPage}
                                         onChange={(e) =>
-                                            setSettings({
+                                            updateSettings({
                                                 ...settings,
                                                 advertising: {
                                                     ...settings.advertising,
@@ -552,7 +676,7 @@ export default function SettingsPage() {
                                 className={`${styles.input} ${styles.intervalInput}`}
                                 value={settings.advertising.refreshInterval}
                                 onChange={(e) =>
-                                    setSettings({
+                                    updateSettings({
                                         ...settings,
                                         advertising: {
                                             ...settings.advertising,
@@ -568,15 +692,30 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 </div>
+                )}
 
                 {/* 保存ボタン */}
-                <button
-                    className={styles.saveButton}
-                    onClick={handleSave}
-                    disabled={isSaving}
-                >
-                    {isSaving ? '保存中...' : '💾 設定を保存'}
-                </button>
+                <div className={styles.saveButtonContainer}>
+                    <button
+                        className={`${styles.saveButton} ${hasUnsavedChanges ? styles.saveButtonActive : ''}`}
+                        onClick={handleSave}
+                        disabled={isSaving || !hasUnsavedChanges}
+                    >
+                        {isSaving ? (
+                            <>
+                                <span className={styles.spinner} />
+                                保存中...
+                            </>
+                        ) : hasUnsavedChanges ? (
+                            <>💾 変更を保存</>
+                        ) : (
+                            <>✓ 保存済み</>
+                        )}
+                    </button>
+                    {hasUnsavedChanges && (
+                        <p className={styles.unsavedNote}>未保存の変更があります</p>
+                    )}
+                </div>
             </div>
         </ProtectedAdminRoute>
     );

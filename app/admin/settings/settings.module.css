@@ -325,8 +325,125 @@
 
 @keyframes spin {
     to {
-        
+        transform: rotate(360deg);
     }
+}
+
+/* タブナビゲーション */
+.tabNav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e5e7eb;
+    overflow-x: auto;
+}
+
+.tabButton {
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.tabButton:hover {
+    color: #111827;
+    background: #f9fafb;
+}
+
+.tabButtonActive {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    font-weight: 600;
+}
+
+/* セクションの説明文 */
+.sectionDescription {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.sectionHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* 保存ボタンコンテナ */
+.saveButtonContainer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    margin: 0 -2rem -2rem -2rem;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.saveButton {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    background: #94a3b8;
+    border: none;
+    border-radius: 8px;
+    cursor: not-allowed;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.saveButton:not(:disabled) {
+    cursor: pointer;
+}
+
+.saveButtonActive {
+    background: #2563eb;
+    cursor: pointer;
+}
+
+.saveButtonActive:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.saveButton:disabled {
+    opacity: 0.6;
+}
+
+.saveButton .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.unsavedNote {
+    font-size: 0.85rem;
+    color: #f59e0b;
+    margin: 0;
+    font-weight: 500;
 }
 
 /* レスポンシブ */
@@ -347,5 +464,23 @@
     .positionsGrid,
     .dateRow {
         grid-template-columns: 1fr;
+    }
+
+    .tabNav {
+        gap: 0;
+    }
+
+    .tabButton {
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .saveButtonContainer {
+        margin: 0 -1.5rem -1.5rem -1.5rem;
+    }
+
+    .saveButton {
+        min-width: auto;
+        width: 100%;
     }
 }
