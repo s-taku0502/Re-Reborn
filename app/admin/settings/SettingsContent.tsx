@@ -155,15 +155,9 @@ export default function SettingsContent() {
 
     // 設定変更時に未保存フラグを立てる
     const updateSettings = (newSettings: SystemSettings) => {
-        console.log('[Settings] updateSettings called, setting hasUnsavedChanges to true');
         setHasUnsavedChanges(true);
         setSettings(newSettings);
     };
-
-    // デバッグ用
-    useEffect(() => {
-        console.log('[Settings] hasUnsavedChanges:', hasUnsavedChanges);
-    }, [hasUnsavedChanges]);
 
     const handleSave = async () => {
         if (!settings) return;
@@ -263,20 +257,6 @@ export default function SettingsContent() {
 
                 {error && <div className={styles.errorMessage}>{error}</div>}
                 {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
-                
-                {/* デバッグ情報（開発時のみ表示） */}
-                {process.env.NODE_ENV === 'development' && (
-                    <div style={{ 
-                        padding: '0.5rem 1rem', 
-                        background: '#f0f0f0', 
-                        borderRadius: '4px',
-                        marginBottom: '1rem',
-                        fontSize: '0.85rem',
-                        fontFamily: 'monospace'
-                    }}>
-                        Debug: hasUnsavedChanges = {hasUnsavedChanges ? 'true' : 'false'}
-                    </div>
-                )}
 
                 {/* メンテナンスモード */}
                 {activeTab === 'maintenance' && (
