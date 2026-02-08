@@ -11,6 +11,7 @@ interface SystemSettings {
         message: string;
         startDate: string | null;
         endDate: string | null;
+        blockedPaths: string[];
     };
     features: {
         walkingLogs: boolean;
@@ -32,6 +33,16 @@ interface SystemSettings {
     updatedAt: string;
     updatedBy: string;
 }
+
+const MAINTENANCE_PATH_OPTIONS = [
+    { label: 'トップ', path: '/' },
+    { label: 'ミッション', path: '/oracle' },
+    { label: '記録', path: '/record' },
+    { label: '冒険の書', path: '/album' },
+    { label: 'マイページ', path: '/mypage' },
+    { label: 'お問い合わせ', path: '/contact' },
+    { label: '初期設定', path: '/setup' },
+];
 
 export default function SettingsPage() {
     const { admin, isLoading: authLoading } = useAdminAuth();
@@ -67,7 +78,16 @@ export default function SettingsPage() {
                 }
 
                 const data = await response.json();
-                setSettings(data.settings);
+                const normalizedSettings: SystemSettings = {
+                    ...data.settings,
+                    maintenanceMode: {
+                        ...data.settings.maintenanceMode,
+                        blockedPaths: Array.isArray(data.settings.maintenanceMode?.blockedPaths)
+                            ? data.settings.maintenanceMode.blockedPaths
+                            : [],
+                    },
+                };
+                setSettings(normalizedSettings);
             } catch (err) {
                 console.error('[Settings] Error fetching settings:', err);
                 setError('設定の取得中にエラーが発生しました');
@@ -236,6 +256,42 @@ export default function SettingsPage() {
                                     })
                                 }
                             />
+                        </div>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>利用不可にするページ</label>
+                        <div className={styles.featureGrid}>
+                            {MAINTENANCE_PATH_OPTIONS.map((option) => {
+                                const isBlocked = settings.maintenanceMode.blockedPaths.includes(option.path);
+                                return (
+                                    <div key={option.path} className={styles.featureItem}>
+                                        <label className={styles.featureToggle}>
+                                            <input
+                                                type="checkbox"
+                                                className={styles.featureToggleInput}
+                                                checked={isBlocked}
+                                                onChange={(e) => {
+                                                    const next = e.target.checked
+                                                        ? [...settings.maintenanceMode.blockedPaths, option.path]
+                                                        : settings.maintenanceMode.blockedPaths.filter(
+                                                            (path) => path !== option.path
+                                                        );
+                                                    setSettings({
+                                                        ...settings,
+                                                        maintenanceMode: {
+                                                            ...settings.maintenanceMode,
+                                                            blockedPaths: next,
+                                                        },
+                                                    });
+                                                }}
+                                            />
+                                            <span className={styles.featureToggleSlider}></span>
+                                        </label>
+                                        <span className={styles.featureLabel}>{option.label}</span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

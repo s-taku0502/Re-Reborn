@@ -132,6 +132,9 @@ export async function PATCH(req: NextRequest) {
                 message: body.maintenanceMode.message ?? '',
                 startDate: body.maintenanceMode.startDate ?? null,
                 endDate: body.maintenanceMode.endDate ?? null,
+                blockedPaths: Array.isArray(body.maintenanceMode.blockedPaths)
+                    ? body.maintenanceMode.blockedPaths
+                    : [],
             };
         }
 

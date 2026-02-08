@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import './globals.css';
+import MaintenanceGuard from './MaintenanceGuard';
 import ServiceWorkerRegistration from './ServiceWorkerRegistration';
 
 export const metadata: Metadata = {
@@ -296,6 +297,7 @@ export default function RootLayout({
                     }}
                 />
                 <ServiceWorkerRegistration />
+                <MaintenanceGuard />
                 {children}
             </body>
         </html>
