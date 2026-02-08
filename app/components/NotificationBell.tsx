@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import NotificationModal from './NotificationModal';
 import styles from './NotificationBell.module.css';
@@ -23,13 +23,7 @@ export default function NotificationBell() {
     // 管理者ページでは非表示
     const isAdminPage = pathname?.startsWith('/admin');
 
-    useEffect(() => {
-        if (!isAdminPage) {
-            fetchNotifications();
-        }
-    }, [isAdminPage]);
-
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         try {
             const response = await fetch('/api/notifications');
             if (!response.ok) return;
@@ -37,12 +31,20 @@ export default function NotificationBell() {
             const data = await response.json();
             if (data.success && data.notifications) {
                 setNotifications(data.notifications);
-                calculateUnreadCount(data.notifications);
+                const readIds = getReadNotificationIds();
+                const unread = data.notifications.filter((n: Notification) => !readIds.includes(n.id));
+                setUnreadCount(unread.length);
             }
         } catch (error) {
             console.error('[NotificationBell] Fetch error:', error);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!isAdminPage) {
+            fetchNotifications();
+        }
+    }, [isAdminPage, fetchNotifications]);
 
     const calculateUnreadCount = (notifs: Notification[]) => {
         const readIds = getReadNotificationIds();
