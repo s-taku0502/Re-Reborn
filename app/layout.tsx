@@ -297,6 +297,14 @@ export default function RootLayout({
                         `,
                     }}
                 />
+
+                {/* Umami Analytics */}
+                <Script
+                    defer
+                    src="https://cloud.umami.is/script.js"
+                    data-website-id="fb11a2f7-1748-41ea-acea-1b5f66e7b202"
+                />
+
                 <ServiceWorkerRegistration />
                 <MaintenanceGuard />
                 <NotificationBell />
