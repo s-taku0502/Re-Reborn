@@ -14,6 +14,7 @@ export interface SystemSettings {
         message: string;
         startDate: string | null;
         endDate: string | null;
+        blockedPaths: string[];
     };
 
     // 機能トグル
@@ -79,6 +80,7 @@ export async function initializeSystemSettings(): Promise<SystemSettings> {
                 message: 'メンテナンス中です。しばらくお待ちください。',
                 startDate: null,
                 endDate: null,
+                blockedPaths: [],
             },
             features: {
                 walkingLogs: true,
@@ -146,6 +148,7 @@ export async function getMaintenanceMode(): Promise<{
     message: string;
     startDate: string | null;
     endDate: string | null;
+    blockedPaths: string[];
 }> {
     try {
         const settings = await getSystemSettings();
@@ -156,6 +159,7 @@ export async function getMaintenanceMode(): Promise<{
                 message: '',
                 startDate: null,
                 endDate: null,
+                blockedPaths: [],
             };
         }
 
@@ -174,6 +178,7 @@ export async function getMaintenanceMode(): Promise<{
             message: settings.maintenanceMode.message,
             startDate: settings.maintenanceMode.startDate,
             endDate: settings.maintenanceMode.endDate,
+            blockedPaths: settings.maintenanceMode.blockedPaths || [],
         };
     } catch (error) {
         console.error('[Admin Settings] Error getting maintenance mode:', error);
@@ -182,6 +187,7 @@ export async function getMaintenanceMode(): Promise<{
             message: '',
             startDate: null,
             endDate: null,
+            blockedPaths: [],
         };
     }
 }
