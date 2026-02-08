@@ -167,27 +167,14 @@ export async function getMaintenanceMode(): Promise<{
         const now = new Date();
         let isInMaintenanceWindow = settings.maintenanceMode.enabled;
 
-        console.log('[Maintenance] Timezone check:', {
-            rawStartDate: settings.maintenanceMode.startDate,
-            rawEndDate: settings.maintenanceMode.endDate,
-            serverNow: now.toISOString(),
-            serverNowJST: new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString(),
-            enabled: settings.maintenanceMode.enabled
-        });
-
         if (settings.maintenanceMode.startDate && settings.maintenanceMode.endDate) {
-            const start = new Date(settings.maintenanceMode.startDate);
-            const end = new Date(settings.maintenanceMode.endDate);
-            
-            console.log('[Maintenance] Time comparison:', {
-                startParsed: start.toISOString(),
-                endParsed: end.toISOString(),
-                nowISO: now.toISOString(),
-                nowGteStart: now >= start,
-                nowLteEnd: now <= end,
-                isInWindow: now >= start && now <= end
-            });
-            
+            const parseJstDate = (value: string): Date => {
+                const hasTimezone = /([zZ]|[+-]\d{2}:\d{2})$/.test(value);
+                return new Date(hasTimezone ? value : `${value}+09:00`);
+            };
+
+            const start = parseJstDate(settings.maintenanceMode.startDate);
+            const end = parseJstDate(settings.maintenanceMode.endDate);
             isInMaintenanceWindow = now >= start && now <= end;
         }
 

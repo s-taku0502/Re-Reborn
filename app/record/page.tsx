@@ -6,7 +6,7 @@ import { Mission, UserLog } from '@/lib/types';
 import { getErrorMessage, showErrorNotification, checkImageSize } from '@/lib/errorHandler';
 import { isCloudinaryConfigured, uploadImageFile } from '@/lib/cloudinary';
 import { compressImageToFile, formatFileSize } from '@/lib/imageCompression';
-import { getImageCaptureMetadata, ImageCaptureMetadata } from '@/lib/imageMetadata';
+import { getImageCaptureMetadata } from '@/lib/imageMetadata';
 import { openGalleryPicker } from '@/lib/imageSelection';
 import { MAX_LOCATION_LENGTH, MAX_MEMO_LENGTH, sanitizeTextInput, validateLocation, validateMemo } from '@/lib/validation';
 import styles from './record.module.css';
@@ -24,7 +24,6 @@ function RecordContent() {
     const [imageCapturedAt, setImageCapturedAt] = useState<Date | null>(null);
     const [imageExifAvailable, setImageExifAvailable] = useState(false);
     const [imageFlagReasons, setImageFlagReasons] = useState<string[]>([]);
-    const [sharingEnabled, setSharingEnabled] = useState(false);
     const [memo, setMemo] = useState('');
     const [location, setLocation] = useState('');
     const [isSaving, setIsSaving] = useState(false);
@@ -38,22 +37,6 @@ function RecordContent() {
             return;
         }
         setUserId(storedUserId);
-
-        // 共有機能の有効化状態を確認
-        const fetchSharingStatus = async () => {
-            try {
-                const response = await fetch('/api/settings/features');
-                if (response.ok) {
-                    const data = await response.json();
-                    setSharingEnabled(data.features?.sharing ?? false);
-                }
-            } catch (error) {
-                console.warn('[Record] Failed to fetch sharing status:', error);
-                setSharingEnabled(false);
-            }
-        };
-
-        fetchSharingStatus();
 
         // URLパラメータからミッション情報を取得
         const missionParam = searchParams.get('mission');
@@ -89,42 +72,40 @@ function RecordContent() {
         try {
             setUploadMessage('画像を圧縮中...');
 
-            // EXIF メタデータを取得（共有機能が有効な場合のみ）
+            // EXIF メタデータを取得
             let capturedAt: Date | null = null;
             let exifAvailable = false;
             const flagReasons: string[] = [];
 
-            if (sharingEnabled) {
-                try {
-                    const metadata = await getImageCaptureMetadata(file);
-                    exifAvailable = metadata.exifAvailable;
-                    capturedAt = metadata.capturedAt;
+            try {
+                const metadata = await getImageCaptureMetadata(file);
+                exifAvailable = metadata.exifAvailable;
+                capturedAt = metadata.capturedAt;
 
-                    // 撮影時刻の検証
-                    const now = new Date();
-                    if (!capturedAt) {
-                        flagReasons.push('EXIF撮影時刻なし');
-                    } else if (capturedAt > now) {
-                        flagReasons.push('EXIF撮影時刻が未来');
-                    } else {
-                        const diffMinutes = (now.getTime() - capturedAt.getTime()) / (1000 * 60);
-                        if (diffMinutes > 10) {
-                            flagReasons.push('撮影から10分以上経過');
-                        }
-                        if (diffMinutes > 24 * 60) {
-                            flagReasons.push('撮影から24時間以上経過');
-                        }
+                // 撮影時刻の検証
+                const now = new Date();
+                if (!capturedAt) {
+                    flagReasons.push('EXIF撮影時刻なし');
+                } else if (capturedAt > now) {
+                    flagReasons.push('EXIF撮影時刻が未来');
+                } else {
+                    const diffMinutes = (now.getTime() - capturedAt.getTime()) / (1000 * 60);
+                    if (diffMinutes > 10) {
+                        flagReasons.push('撮影から10分以上経過');
                     }
-
-                    console.log('[Record] Image EXIF check:', {
-                        capturedAt: capturedAt ? capturedAt.toISOString() : null,
-                        exifAvailable,
-                        flagReasons,
-                    });
-                } catch (error) {
-                    console.warn('[Record] EXIF metadata extraction failed:', error);
-                    flagReasons.push('メタデータエラー');
+                    if (diffMinutes > 24 * 60) {
+                        flagReasons.push('撮影から24時間以上経過');
+                    }
                 }
+
+                console.log('[Record] Image EXIF check:', {
+                    capturedAt: capturedAt ? capturedAt.toISOString() : null,
+                    exifAvailable,
+                    flagReasons,
+                });
+            } catch (error) {
+                console.warn('[Record] EXIF metadata extraction failed:', error);
+                flagReasons.push('メタデータエラー');
             }
 
             // 画像を圧縮（1024x1024、品質80%）
@@ -305,31 +286,29 @@ function RecordContent() {
                                     </div>
                                 </label>
 
-                                {sharingEnabled && (
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            try {
-                                                const galleryFile = await openGalleryPicker();
-                                                if (galleryFile) {
-                                                    // ギャラリー選択の場合のイベント作成（手動処理）
-                                                    const syntheticEvent = {
-                                                        target: {
-                                                            files: [galleryFile],
-                                                        },
-                                                    } as unknown as ChangeEvent<HTMLInputElement>;
-                                                    await handleImageCapture(syntheticEvent);
-                                                }
-                                            } catch (error) {
-                                                console.error('Gallery picker error:', error);
-                                                showErrorNotification('ギャラリーから選択できませんでした');
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        try {
+                                            const galleryFile = await openGalleryPicker();
+                                            if (galleryFile) {
+                                                // ギャラリー選択の場合のイベント作成（手動処理）
+                                                const syntheticEvent = {
+                                                    target: {
+                                                        files: [galleryFile],
+                                                    },
+                                                } as unknown as ChangeEvent<HTMLInputElement>;
+                                                await handleImageCapture(syntheticEvent);
                                             }
-                                        }}
-                                        className={styles.galleryButton}
-                                    >
-                                        🖼️ ギャラリーから選択
-                                    </button>
-                                )}
+                                        } catch (error) {
+                                            console.error('Gallery picker error:', error);
+                                            showErrorNotification('ギャラリーから選択できませんでした');
+                                        }
+                                    }}
+                                    className={styles.galleryButton}
+                                >
+                                    🖼️ ギャラリーから選択
+                                </button>
                             </div>
                         ) : (
                             <div className={styles.imagePreview}>
