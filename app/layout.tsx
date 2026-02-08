@@ -3,6 +3,7 @@ import Script from 'next/script';
 import './globals.css';
 import MaintenanceGuard from './MaintenanceGuard';
 import ServiceWorkerRegistration from './ServiceWorkerRegistration';
+import NotificationBell from './components/NotificationBell';
 
 export const metadata: Metadata = {
     // SEO強化: タイトル・説明文最適化
@@ -298,6 +299,7 @@ export default function RootLayout({
                 />
                 <ServiceWorkerRegistration />
                 <MaintenanceGuard />
+                <NotificationBell />
                 {children}
             </body>
         </html>
